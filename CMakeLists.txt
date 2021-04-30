@@ -8,6 +8,9 @@ add_executable(campoelettrico
 main.cpp
 timer.cpp
 draw.cpp
+entities/sorgente.cpp
+entities/campoVettoriale.cpp
+entities/vector.cpp
 )
 
 INCLUDE(FindPkgConfig)

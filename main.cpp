@@ -1,4 +1,7 @@
 #include "draw.h"
+#include "entities/campoVettoriale.h"
+#include "entities/sorgente.h"
+#include "entities/vector.h"
 #include "timer.h"
 #include <SDL2/SDL.h>
 #include <cmath>
@@ -8,27 +11,10 @@
 #define SCREEN_HEIGHT 600
 
 const float costanteColoumb = 8.987551792314e9;
-const float densita = 12;
-const float angoloIniziale = 3.1415 / 3;
-const float velocitaIniziale = 0;
+const float densita = 10;
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
-
-bool isInside(float x, float y, float posx, float posy, float radius) {
-
-  bool inside = true;
-  if (x < (posx - radius)) {
-    inside = false;
-  } else if (x > (posx + radius)) {
-    inside = false;
-  } else if (y < (posy - radius)) {
-    inside = false;
-  } else if (y > (posy + radius)) {
-    inside = false;
-  }
-  return inside;
-}
 
 void simulazione(float &v, float &a, float dt) {
   float acc;
@@ -67,32 +53,8 @@ bool init() {
   return success;
 }
 
-struct vector2 {
-  float x = 0;
-  float y = 0;
-  float modulo = 0;
-};
-
-struct carica {
-  vector2 posizione;
-  float modulo = 0;
-};
-
-vector2 normalize(vector2 daNormalizzare) {
-  vector2 normalizzato;
-  float modulo = sqrt((daNormalizzare.x * daNormalizzare.x) + (daNormalizzare.y * daNormalizzare.y));
-  normalizzato.x = daNormalizzare.x / modulo;
-  normalizzato.y = daNormalizzare.y / modulo;
-  normalizzato.modulo = modulo;
-  return normalizzato;
-}
-
-vector2 distanza(vector2 a, vector2 b) {
-  vector2 distanzaNormalizzata;
-  distanzaNormalizzata.x = -a.x + b.x;
-  distanzaNormalizzata.y = -a.y + b.y;
-  distanzaNormalizzata.modulo;
-  return normalize(distanzaNormalizzata);
+void addSorgenteFunc(std::vector<Sorgente> &array) {
+  array.push_back(*new Sorgente({(float)array.size() * 50, 200}, 1.5e-9));
 }
 
 int main() {
@@ -104,104 +66,90 @@ int main() {
   SDL_Event e;
   Timer stepTimer;
   float lunghezza = 30;
-  bool lpress = false;
   int x, y;
-  std::vector<vector2> punti;
-  std::vector<vector2>::iterator it;
-  carica sorgentePrima = {{200, 300}, 2.5e-9};
+  std::vector<Sorgente> sorgenti;
+  std::vector<Sorgente>::iterator itSorgenti;
+  std::vector<PuntoDelCampo> punti;
+  std::vector<PuntoDelCampo>::iterator it;
+  Sorgente sorgentePrima = Sorgente({200, 300}, -0.5e-9);
+  Sorgente sorgenteSeconda = Sorgente({400, 300}, -3.5e-9);
+  Sorgente sorgenteTerza = Sorgente({200, 600}, -3.5e-9);
+  sorgenti.push_back(sorgentePrima);
+  sorgenti.push_back(sorgenteSeconda);
+  sorgenti.push_back(sorgenteTerza);
   //carica caricaDiProva = {{600, 300}, {}};
   for (unsigned int i = 0; i < SCREEN_WIDTH; i = i + densita) {
     for (unsigned int j = 0; j < SCREEN_HEIGHT; j = j + densita) {
-
-      punti.push_back(*new vector2{(float)i, (float)j});
+      punti.push_back(*new PuntoDelCampo((float)i, (float)j));
     }
   }
   while (!quit) {
-    while (SDL_PollEvent(&e) != 0) {
 
+    while (SDL_PollEvent(&e) != 0) {
       if (e.type == SDL_QUIT) {
         quit = true;
-      } else if (e.type == SDL_MOUSEBUTTONDOWN) {
-        SDL_GetMouseState(&x, &y);
-        if (e.button.button == SDL_BUTTON_LEFT && isInside(x, y, sorgentePrima.posizione.x, sorgentePrima.posizione.y, 20)) {
-          lpress = true;
-          printf("Inside left\n");
-        }
-      } else if (e.type == SDL_MOUSEBUTTONUP) {
-        if (e.button.button == SDL_BUTTON_LEFT && lpress) {
-          SDL_GetMouseState(&x, &y);
-          //velocitaMouse(x, y, (SCREEN_WIDTH / 2) + sorgentePrima.x, (SCREEN_HEIGHT / 4) + sorgentePrima.y, velocita.x);
-          lpress = false;
-        }
       } else if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
-        case SDLK_UP:
-          lunghezza += 10;
-          break;
-        case SDLK_DOWN:
-          lunghezza -= 10;
-          break;
-        case SDLK_z:
-          sorgentePrima.modulo -= 0.1e-9;
-          break;
-        case SDLK_x:
-          sorgentePrima.modulo += 0.1e-9;
-          break;
+        case SDLK_n:
+          addSorgenteFunc(sorgenti);
         }
       }
+      SDL_GetMouseState(&x, &y);
+      for (itSorgenti = sorgenti.begin(); itSorgenti != sorgenti.end(); itSorgenti++) {
+        itSorgenti->handleEnvent(e, x, y);
+      }
     }
-    SDL_GetMouseState(&x, &y);
 
     // SIMULAZIONE
 
-    float dt = stepTimer.getTicks() / 1000.f;
+    //float dt = stepTimer.getTicks() / 1000.f;
 
-    stepTimer.start();
+    //stepTimer.start();
 
     // RENDERING
-
-    if (lpress) {
-      sorgentePrima.posizione.x = x;
-      sorgentePrima.posizione.y = y;
-    }
 
     SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear(gRenderer);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-    //SDL_RenderDrawLine(gRenderer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4, (SCREEN_WIDTH / 2) + sorgentePrima.x, (SCREEN_HEIGHT / 4) + sorgentePrima.y);
+    //SDL_RenderDrawLine(gRenderer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4, (SCREEN_WIDTH / 2) + itSorgenti->x, (SCREEN_HEIGHT / 4) + itSorgenti->y);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
     // Punti di prova
+    for (itSorgenti = sorgenti.begin(); itSorgenti != sorgenti.end(); itSorgenti++) {
+
+      if (itSorgenti->selected) {
+        itSorgenti->setPosition(vector2{(float)x, (float)y});
+      }
+      for (it = punti.begin(); it != punti.end(); it++) {
+        vector2 distanzaVettore = distanza(itSorgenti->getPosition(), it->getPosition());
+        vector2 intensita;
+        float valoreCampo = costanteColoumb * (itSorgenti->getCharge() / (distanzaVettore.modulo * distanzaVettore.modulo));
+        intensita.x = valoreCampo * distanzaVettore.xNormalized;
+        intensita.y = valoreCampo * distanzaVettore.yNormalized;
+        intensita.intensita = valoreCampo;
+        it->addVector2(intensita);
+
+        // float percentuale;
+        // if (intensita * 100000 > 0xFF)
+        //   percentuale = 0xFF;
+        // else if (intensita * 100000 < 0x20)
+        //   percentuale = 0x20;
+        // else
+        //   percentuale = abs(intensita * 100000);
+
+        //DrawCircle(gRenderer, it->x, it->y, 5);
+      }
+      //SDL_RenderDrawLine(gRenderer, it->x, it->y, it->x + distanzaVettore.x * lunghezza, it->y + distanzaVettore.y * lunghezza);
+
+      SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+      DrawCircle(gRenderer, itSorgenti->getPosition().x, itSorgenti->getPosition().y, 10);
+    }
 
     for (it = punti.begin(); it != punti.end(); it++) {
-      vector2 distanzaPunto = distanza(sorgentePrima.posizione, *it);
-      float intensita;
-      if (distanzaPunto.modulo != 0) {
-        intensita = abs(costanteColoumb * (sorgentePrima.modulo / (distanzaPunto.modulo * distanzaPunto.modulo)));
-        it->modulo = intensita;
-      } else {
-        intensita = 0;
-        it->modulo = 0xFF;
-      }
-      float percentuale;
-      if (intensita * 100000 > 0xFF)
-        percentuale = 0xFF;
-      else if (intensita * 100000 < 0x20)
-        percentuale = 0x20;
-      else
-        percentuale = abs(intensita * 100000);
-      if (sorgentePrima.modulo > 0) {
-        SDL_SetRenderDrawColor(gRenderer, 0x00, percentuale, 0x00, 0xFF);
-        SDL_RenderDrawLine(gRenderer, it->x, it->y, it->x + distanzaPunto.x * lunghezza, it->y + distanzaPunto.y * lunghezza);
-      } else {
-        SDL_SetRenderDrawColor(gRenderer, percentuale, 0x00, 0x00, 0xFF);
-        SDL_RenderDrawLine(gRenderer, it->x, it->y, it->x - distanzaPunto.x * lunghezza, it->y - distanzaPunto.y * lunghezza);
-      }
-
-      SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-      //DrawCircle(gRenderer, it->x, it->y, 5);
+      it->computeVectors();
+      it->render(gRenderer);
+      it->emptyVectors();
     }
-    DrawCircle(gRenderer, sorgentePrima.posizione.x, sorgentePrima.posizione.y, 10);
     SDL_RenderPresent(gRenderer);
   }
 
