@@ -1,8 +1,8 @@
 #pragma once
+#include "settings.h"
 #include "vector.h"
 #include <SDL2/SDL.h>
 #include <vector>
-
 class PuntoDelCampo {
 public:
   PuntoDelCampo(float xpos, float ypos);

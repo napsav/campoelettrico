@@ -53,12 +53,7 @@ void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
     }
   } else if (e.type == SDL_KEYDOWN) {
     switch (e.key.keysym.sym) {
-    case SDLK_UP:
-      //lunghezza += 10;
-      break;
-    case SDLK_DOWN:
-      //lunghezza -= 10;
-      break;
+
     case SDLK_z:
       if (isInside(x, y, posizione.x, posizione.y, 10)) {
         carica -= 0.1e-9;

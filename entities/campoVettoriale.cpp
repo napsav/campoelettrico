@@ -21,10 +21,13 @@ vector2 PuntoDelCampo::getPosition() {
 void PuntoDelCampo::computeVectors() {
   vector2 normalizzando;
   for (it = vettoriDaSommare.begin(); it != vettoriDaSommare.end(); it++) {
-    normalizzando = normalize(*it);
-    sommaFinale.x += normalizzando.xNormalized;
-    sommaFinale.y += normalizzando.yNormalized;
-    carica += normalizzando.intensita;
+
+    sommaFinale.x += it->x;
+    sommaFinale.y += it->y;
+    carica += it->intensita;
+    normalizzando = normalize(sommaFinale);
+    sommaFinale.xNormalized = normalizzando.xNormalized;
+    sommaFinale.yNormalized = normalizzando.yNormalized;
   }
 }
 
@@ -41,7 +44,7 @@ void PuntoDelCampo::render(SDL_Renderer *renderer) {
   } else {
     SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
   }
-  SDL_RenderDrawLine(renderer, posizione.x, posizione.y, posizione.x + (sommaFinale.x * 5), posizione.y + (sommaFinale.y * 5));
+  SDL_RenderDrawLine(renderer, posizione.x, posizione.y, posizione.x + (sommaFinale.xNormalized * lunghezza), posizione.y + (sommaFinale.yNormalized * lunghezza));
 }
 
 void PuntoDelCampo::setCarica(float charge) {
