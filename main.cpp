@@ -112,6 +112,9 @@ int main() {
           densita -= 2;
           setDensity(punti, densita);
           break;
+	case SDLK_r:
+		sorgenti.clear();
+		break;
         }
       }
       SDL_GetMouseState(&x, &y);
