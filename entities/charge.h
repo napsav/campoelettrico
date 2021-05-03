@@ -1,26 +1,29 @@
 #pragma once
-#include "vector.h"
 #include <SDL2/SDL.h>
+
 #include <vector>
 
-class Carica {
-public:
-Carica(float xpos, float ypos, float carica);
-vector2 getPosition();
-vector2 getVelocity();
-void computeForces();
-vector2 getAcceleration();
-void move(float dt);
-void render(SDL_Renderer *renderer);
-void setAcceleration(vector2 accelerazione);
+#include "vector.h"
 
-private:
-float charge;
-float mass;
-vector2 velocity;
-vector2 acceleration;
-vector2 position;
-vector2 sommaForze;
-std::vector<vector2>::iterator it;
-std::vector<vector2> forze;
+class Carica {
+ public:
+  Carica(float xpos, float ypos, float carica);
+  vector2 getPosition();
+  vector2 getVelocity();
+  void computeForces();
+  vector2 getAcceleration();
+  void updatePosition(float dt);
+  void render(SDL_Renderer *renderer);
+  void addForce(vector2 forza);
+  void emptyVectors();
+
+ private:
+  float charge;
+  float mass = 9.109389699e-5;
+  vector2 velocity;
+  vector2 acceleration;
+  vector2 position;
+  vector2 sommaForze;
+  std::vector<vector2>::iterator it;
+  std::vector<vector2> forze;
 };

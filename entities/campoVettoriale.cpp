@@ -50,3 +50,6 @@ void PuntoDelCampo::render(SDL_Renderer *renderer) {
 void PuntoDelCampo::setCarica(float charge) {
   carica = charge;
 }
+PuntoDelCampo::~PuntoDelCampo() {
+	vettoriDaSommare.clear();
+}

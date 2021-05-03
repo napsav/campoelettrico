@@ -13,6 +13,7 @@ public:
   void emptyVectors();
   void render(SDL_Renderer *renderer);
   void setCarica(float charge);
+  ~PuntoDelCampo();
 
 private:
   float carica;
