@@ -3,5 +3,6 @@ campoelettrico
 run.sh
 .ccls
 compile_commands.json
-compile_commands.json
+imgui.ini
 .clang-format
+.cache/
