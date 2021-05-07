@@ -56,11 +56,15 @@ void Carica::computeForces() {
   }
 
   dividiForzaPerMassa(sommaForze, mass);
+//  acceleration.x += sommaForze.x;
+//  acceleration.y += sommaForze.y;
+
   acceleration = sommaForze;
 }
 
 void Carica::render(SDL_Renderer *renderer) {
   DrawCircle(renderer, position.x, position.y, raggio);
+  SDL_RenderDrawLine(renderer, position.x, position.y,position.x + acceleration.x, position.y + acceleration.y);
 }
 
 void Carica::emptyVectors() {

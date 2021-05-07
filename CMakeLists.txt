@@ -12,6 +12,13 @@ entities/sorgente.cpp
 entities/campoVettoriale.cpp
 entities/vector.cpp
 entities/charge.cpp
+ui/imgui_sdl.cpp
+ui/imgui.cpp
+ui/imgui_demo.cpp
+ui/imgui_draw.cpp
+ui/imgui_sdl.cpp
+ui/imgui_tables.cpp
+ui/imgui_widgets.cpp
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

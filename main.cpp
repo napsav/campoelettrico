@@ -3,6 +3,8 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include "ui/imgui_sdl.h"
+#include "ui/imgui.h"
 
 #include "./draw.h"
 #include "./timer.h"
@@ -11,13 +13,13 @@
 #include "entities/settings.h"
 #include "entities/sorgente.h"
 #include "entities/vector.h"
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
-
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
+double scala = 0.000001;
 const float costanteColoumb = 8.987551792314e9;
 int densita = 32;
 int lunghezza = 10;
-const float caricaElettrone = 1.602176634e-19;
+const float caricaDiProva = 1.602176634e-5;
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
@@ -62,8 +64,8 @@ void addSorgenteFunc(std::vector<Sorgente> &array) {
 }
 
 void addCaricaFunc(std::vector<Carica> &array, int x, int y) {
-  array.push_back(*new Carica(static_cast<float>(x), static_cast<float>(y),
-                              caricaElettrone));
+  array.push_back(
+      *new Carica(static_cast<float>(x), static_cast<float>(y), caricaDiProva));
   std::cout << "aggiungo carica con posizione x " << x << " e posizione y " << y
             << std::endl;
 }
@@ -90,6 +92,8 @@ int main() {
   sorgenti.push_back(sorgentePrima);
   sorgenti.push_back(sorgenteSeconda);
   sorgenti.push_back(sorgenteTerza);
+  	ImGui::CreateContext();
+	ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
   // carica caricaDiProva = {{600, 300}, {}};
   setDensity(punti, densita);
   while (!quit) {
@@ -101,7 +105,7 @@ int main() {
         switch (e.key.keysym.sym) {
           case SDLK_n:
             addSorgenteFunc(sorgenti);
-	    break;
+            break;
           case SDLK_UP:
             lunghezza += 10;
             break;
@@ -158,8 +162,8 @@ int main() {
         valoreCampo = costanteColoumb *
                       (itSorgenti->getCharge() /
                        (distanzaVettore.modulo * distanzaVettore.modulo));
-        intensita.x = valoreCampo * distanzaVettore.xNormalized;
-        intensita.y = valoreCampo * distanzaVettore.yNormalized;
+        intensita.x = valoreCampo * distanzaVettore.xNormalized * scala;
+        intensita.y = valoreCampo * distanzaVettore.yNormalized * scala;
         intensita.intensita = valoreCampo;
         it->addVector2(intensita);
       }
@@ -181,21 +185,21 @@ int main() {
           distanzaVettore =
               distanza(itSorgenti->getPosition(), itCariche->getPosition());
           std::cout << "Distanza: " << distanzaVettore.modulo << std::endl;
-	  if(distanzaVettore.modulo > 4) {
-          valoreCampo = costanteColoumb *
-                        (itSorgenti->getCharge() /
-                         (distanzaVettore.modulo * distanzaVettore.modulo));
-          std::cout << "Valore: " << valoreCampo << std::endl;
-          intensita.x = valoreCampo * distanzaVettore.xNormalized;
-          intensita.y = valoreCampo * distanzaVettore.yNormalized;
-          intensita.intensita = valoreCampo;
-          itCariche->addForce(intensita);
-	  }else {
-		cariche.erase(itCariche);
-		std::cout << "Cancellazione carica" << std::endl;
-		//cariche.clear();
-		itCariche--;
-	  }
+          if (distanzaVettore.modulo > 4) {
+            valoreCampo = costanteColoumb *
+                          (itSorgenti->getCharge() /
+                           (distanzaVettore.modulo * distanzaVettore.modulo));
+            std::cout << "Valore: " << valoreCampo << std::endl;
+            intensita.x = valoreCampo * distanzaVettore.xNormalized * scala;
+            intensita.y = valoreCampo * distanzaVettore.yNormalized * scala;
+            intensita.intensita = valoreCampo;
+            itCariche->addForce(intensita);
+          } else {
+            cariche.erase(itCariche);
+            std::cout << "Cancellazione carica" << std::endl;
+            // cariche.clear();
+            itCariche--;
+          }
         }
       }
     }
@@ -206,7 +210,6 @@ int main() {
            itCariche++) {
         itCariche->computeForces();
         itCariche->updatePosition(dt);
-        itCariche->emptyVectors();
       }
     }
     stepTimer.start();
@@ -223,8 +226,16 @@ int main() {
       it->render(gRenderer);
       it->emptyVectors();
     }
+    ImGui::Render();
+    ImGuiSDL::Render(ImGui::GetDrawData());
     SDL_RenderPresent(gRenderer);
   }
+	ImGuiSDL::Deinitialize();
+
+	SDL_DestroyRenderer(gRenderer);
+	SDL_DestroyWindow(gWindow);
+
+	ImGui::DestroyContext();
   SDL_Quit();
   return 0;
 }

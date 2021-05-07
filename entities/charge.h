@@ -19,7 +19,7 @@ class Carica {
 
  private:
   float charge;
-  float mass = 9.109389699e-5;
+  float mass = 9.109389699e-10;
   vector2 velocity;
   vector2 acceleration;
   vector2 position;

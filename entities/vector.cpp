@@ -5,6 +5,8 @@ vector2 normalize(vector2 daNormalizzare) {
   float x = daNormalizzare.x;
   float y = daNormalizzare.y;
   float modulo = sqrt((x * x) + (y * y));
+  normalizzato.x = daNormalizzare.x;
+  normalizzato.y = daNormalizzare.y;
   normalizzato.xNormalized = x / modulo;
   normalizzato.yNormalized = y / modulo;
   normalizzato.modulo = modulo;

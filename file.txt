@@ -1,2 +1,0 @@
-Scanning dependencies of target campoelettrico
-[ 12%] Building CXX object CMakeFiles/campoelettrico.dir/main.cpp.o
