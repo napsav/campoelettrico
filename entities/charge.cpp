@@ -8,7 +8,6 @@
 #include "../draw.h"
 #include "settings.h"
 #include "sorgente.h"
-
 int raggio = 4;
 Carica::Carica(float xpos, float ypos, float carica) {
   charge = carica;
@@ -26,12 +25,14 @@ vector2 Carica::getPosition() { return position; }
 
 vector2 Carica::getAcceleration() { return acceleration; }
 
+float Carica::getCharge() { return charge; }
+
 void Carica::updatePosition(float dt) {
-  velocity.x += sommaForze.x * dt;
-  position.x += velocity.x * dt;
+  velocity.x += sommaForze.x * dt  ;
+  position.x += velocity.x * dt* 1000 ;
 
   velocity.y += sommaForze.y * dt;
-  position.y += velocity.y * dt;
+  position.y += velocity.y * dt*1000;
   std::cout << "Posizione x : " << position.x << std::endl;
   std::cout << "Velocita x : " << velocity.x << std::endl;
 }

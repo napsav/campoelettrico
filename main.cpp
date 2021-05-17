@@ -17,10 +17,12 @@
 #define SCREEN_HEIGHT 720
 double scala = 0.000001;
 const float costanteColoumb = 8.987551792314e9;
-int densita = 32;
+int densita = 16;
 int lunghezza = 10;
 int raggioSorgente = 10;
-const float caricaDiProva = 1.602176634e-5;
+float maxCarica = 0.05;
+int coloreBase = 0x14;
+const float caricaDiProva = 1.602176634e-19;
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
@@ -70,7 +72,29 @@ void addCaricaFunc(std::vector<Carica> &array, int x, int y) {
   std::cout << "aggiungo carica con posizione x " << x << " e posizione y " << y
             << std::endl;
 }
+void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
+                      std::vector<Carica>::iterator &it,
+                      std::vector<Carica> &cariche) {
+  vector2 intensita;
+  float valoreCampo;
+  vector2 distanzaVettore =
+      distanza(itSorgenti->getPosition(), it->getPosition());
 
+  if (distanzaVettore.modulo > raggioSorgente) {
+    valoreCampo =
+        costanteColoumb * (itSorgenti->getCharge() /
+                           ((distanzaVettore.modulo * distanzaVettore.modulo)*scala)) * it->getCharge();
+    std::cout << "Valore: " << valoreCampo << std::endl;
+    intensita.x = valoreCampo * distanzaVettore.xNormalized;
+    intensita.y = valoreCampo * distanzaVettore.yNormalized;
+    intensita.intensita = valoreCampo;
+    it->addForce(intensita);
+  } else {
+    cariche.erase(it);
+    std::cout << "Cancellazione carica" << std::endl;
+    it--;
+  }
+}
 void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
                       std::vector<PuntoDelCampo>::iterator &it) {
   vector2 intensita;
@@ -96,6 +120,7 @@ int main() {
   SDL_Event e;
   Timer stepTimer;
   bool open = true;
+  bool pause = true;
   int x, y;
   std::vector<Sorgente> sorgenti;
   std::vector<Sorgente>::iterator itSorgenti;
@@ -104,7 +129,7 @@ int main() {
   std::vector<Carica>::iterator itCariche;
   std::vector<Carica> cariche;
   Sorgente sorgentePrima = Sorgente({200, 300}, -0.5e-9);
-  Sorgente sorgenteSeconda = Sorgente({400, 300}, -3.5e-9);
+  Sorgente sorgenteSeconda = Sorgente({600, 300}, -3.5e-9);
   Sorgente sorgenteTerza = Sorgente({200, 600}, 0.1e-9);
   sorgenti.push_back(sorgentePrima);
   sorgenti.push_back(sorgenteSeconda);
@@ -148,6 +173,9 @@ int main() {
           case SDLK_SPACE:
             addCaricaFunc(cariche, x, y);
             break;
+	  case SDLK_p:
+	    pause = !pause;
+	    break;
         }
       } else if (e.type == SDL_MOUSEBUTTONDOWN) {
       } else if (e.type == SDL_MOUSEWHEEL) {
@@ -170,22 +198,9 @@ int main() {
 
     // Finestra impostazioni
 
-    ImGui::NewFrame();
-    ImGui::Begin("Impostazioni", &open);
-    ImGui::Text("Densità campo vettoriale");
-    if (ImGui::SliderInt("densità", &densita, 4, 64))
-      setDensity(punti, densita);
-    ImGui::Text("Lunghezza vettori normalizzati");
-    ImGui::SliderInt("lunghezza", &lunghezza, 1, 30);
-    ImGui::Text("Raggio rappresentazione sorgenti");
-    ImGui::SliderInt("raggio", &raggioSorgente, 1,
-                     30);
-    ImGui::End();
-
     SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear(gRenderer);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    vector2 distanzaVettore;
 
     // Punti del campo vettoriale, ogni vettore rappresenta la forza totale
     // del/dei campi elettrico/i
@@ -206,47 +221,41 @@ int main() {
       if (cariche.size() > 0) {
         for (itCariche = cariche.begin(); itCariche != cariche.end();
              itCariche++) {
-          std::cout << "Inizio calcolo forze" << std::endl;
-          vector2 intensita;
-          float valoreCampo;
-          std::cout << "Posizione precalcolo x: " << itCariche->getPosition().x
-                    << std::endl;
-
-          std::cout << "Posizione precalcolo y: " << itCariche->getPosition().y
-                    << std::endl;
-          distanzaVettore =
-              distanza(itSorgenti->getPosition(), itCariche->getPosition());
-          std::cout << "Distanza: " << distanzaVettore.modulo << std::endl;
-          if (distanzaVettore.modulo > 4) {
-            valoreCampo = costanteColoumb *
-                          (itSorgenti->getCharge() /
-                           (distanzaVettore.modulo * distanzaVettore.modulo));
-            std::cout << "Valore: " << valoreCampo << std::endl;
-            intensita.x = valoreCampo * distanzaVettore.xNormalized * scala;
-            intensita.y = valoreCampo * distanzaVettore.yNormalized * scala;
-            intensita.intensita = valoreCampo;
-            itCariche->addForce(intensita);
-          } else {
-            cariche.erase(itCariche);
-            std::cout << "Cancellazione carica" << std::endl;
-            // cariche.clear();
-            itCariche--;
-          }
+          simulazioneCampo(itSorgenti, itCariche, cariche);
         }
       }
       SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
       DrawCircle(gRenderer, itSorgenti->getPosition().x,
                  itSorgenti->getPosition().y, raggioSorgente);
-      
-//          ImGui::Begin("Sorgente", &itSorgenti->windowOpen);
-//          ImGui::SliderFloat("Carica", &itSorgenti->carica, -10.0e-9, 10.0e-9);
-//          ImGui::End();
+
+      //          ImGui::Begin("Sorgente", &itSorgenti->windowOpen);
+      //          ImGui::SliderFloat("Carica", &itSorgenti->carica,
+      //          -10.0e-9, 10.0e-9); ImGui::End();
     }
+
+    // --------------------
+    // 	IMGUI
+    // --------------------
+
+    ImGui::NewFrame();
+    ImGui::Begin("Impostazioni", &open);
+    ImGui::Text("Densità campo vettoriale");
+    if (ImGui::SliderInt("densità", &densita, 4, 64))
+      setDensity(punti, densita);
+    ImGui::Text("Lunghezza vettori normalizzati");
+    ImGui::SliderInt("lunghezza", &lunghezza, 1, 30);
+    ImGui::Text("Raggio rappresentazione sorgenti");
+    ImGui::SliderInt("raggio", &raggioSorgente, 1, 30);
+    ImGui::Text("Max Carica (Rendering)");
+    ImGui::SliderFloat("maxCarica", &maxCarica, 0.001, 0.1);
+    ImGui::Text("Colore base (Rendering)");
+    ImGui::SliderInt("coloreBase",&coloreBase, 0, 255);
+    ImGui::End();
 
     // Simulazione movimento cariche di prova
 
     float dt = stepTimer.getTicks() / 1000.f;
-    if (cariche.size() > 0) {
+    if (!pause && cariche.size() > 0) {
       for (itCariche = cariche.begin(); itCariche != cariche.end();
            itCariche++) {
         itCariche->computeForces();
@@ -279,6 +288,7 @@ int main() {
     ImGuiSDL::Render(ImGui::GetDrawData());
     SDL_RenderPresent(gRenderer);
   }
+
   ImGuiSDL::Deinitialize();
 
   SDL_DestroyRenderer(gRenderer);

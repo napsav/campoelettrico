@@ -16,10 +16,11 @@ class Carica {
   void render(SDL_Renderer *renderer);
   void addForce(vector2 forza);
   void emptyVectors();
+  float getCharge();
 
  private:
   float charge;
-  float mass = 9.109389699e-10;
+  float mass = 9.109389699e-15;
   vector2 velocity;
   vector2 acceleration;
   vector2 position;
