@@ -42,10 +42,10 @@ void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
       }
     } else if (e.button.button == SDL_BUTTON_RIGHT) {
       if (isInside(x, y, posizione.x, posizione.y, 10)) {
-        if (!windowOpen) {
-          windowOpen = true;
-        } else {
+        if(windowOpen) {
           windowOpen = false;
+        } else {
+          windowOpen = true;
         }
       } else {
         windowOpen = false;

@@ -3,3 +3,4 @@ extern int lunghezza;
 extern int raggio;
 extern float maxCarica;
 extern int coloreBase;
+extern int scala;

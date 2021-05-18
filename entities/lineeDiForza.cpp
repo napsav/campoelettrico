@@ -30,10 +30,10 @@ float CaricaLineaDiForza::getCharge() { return charge; }
 
 void CaricaLineaDiForza::updatePosition(float dt) {
   velocity.x += sommaForze.x * dt  ;
-  position.x += velocity.x * dt* 1000 ;
+  position.x += (velocity.x * dt) * scala;
 
   velocity.y += sommaForze.y * dt;
-  position.y += velocity.y * dt*1000;
+  position.y += (velocity.y * dt) * scala;
   std::cout << "Posizione x : " << position.x << std::endl;
   std::cout << "Velocita x : " << velocity.x << std::endl;
 }
