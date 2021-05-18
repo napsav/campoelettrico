@@ -173,9 +173,9 @@ int main() {
           case SDLK_SPACE:
             addCaricaFunc(cariche, x, y);
             break;
-	  case SDLK_p:
-	    pause = !pause;
-	    break;
+          case SDLK_p:
+            pause = !pause;
+            break;
         }
       } else if (e.type == SDL_MOUSEBUTTONDOWN) {
       } else if (e.type == SDL_MOUSEWHEEL) {
@@ -204,9 +204,10 @@ int main() {
 
     // Punti del campo vettoriale, ogni vettore rappresenta la forza totale
     // del/dei campi elettrico/i
-
+    unsigned int index;
     for (itSorgenti = sorgenti.begin(); itSorgenti != sorgenti.end();
          itSorgenti++) {
+      index = itSorgenti - sorgenti.begin();
       if (itSorgenti->selected) {
         itSorgenti->setPosition(
             vector2{static_cast<float>(x), static_cast<float>(y)});
@@ -227,10 +228,10 @@ int main() {
       SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
       DrawCircle(gRenderer, itSorgenti->getPosition().x,
                  itSorgenti->getPosition().y, raggioSorgente);
-
-      //          ImGui::Begin("Sorgente", &itSorgenti->windowOpen);
-      //          ImGui::SliderFloat("Carica", &itSorgenti->carica,
-      //          -10.0e-9, 10.0e-9); ImGui::End();
+      std::string titolo = "Carica " + std::to_string(index);
+      ImGui::Begin(titolo.c_str(), &itSorgenti->windowOpen);
+      ImGui::SliderFloat("Carica", &itSorgenti->carica, -10.0e-9, 10.0e-9);
+      ImGui::End();
     }
 
     // --------------------
