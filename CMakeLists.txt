@@ -19,6 +19,7 @@ ui/imgui_draw.cpp
 ui/imgui_sdl.cpp
 ui/imgui_tables.cpp
 ui/imgui_widgets.cpp
+graph.cpp
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -11,6 +11,7 @@
 #include "entities/settings.h"
 #include "entities/sorgente.h"
 #include "entities/vector.h"
+#include "graph.h"
 #include "ui/imgui.h"
 #include "ui/imgui_sdl.h"
 #define SCREEN_WIDTH 1280
@@ -82,8 +83,10 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
 
   if (distanzaVettore.modulo > raggioSorgente) {
     valoreCampo =
-        costanteColoumb * (itSorgenti->getCharge() /
-                           ((distanzaVettore.modulo * distanzaVettore.modulo)*scala)) * it->getCharge();
+        costanteColoumb *
+        (itSorgenti->getCharge() /
+         ((distanzaVettore.modulo * distanzaVettore.modulo) * scala)) *
+        it->getCharge();
     std::cout << "Valore: " << valoreCampo << std::endl;
     intensita.x = valoreCampo * distanzaVettore.xNormalized;
     intensita.y = valoreCampo * distanzaVettore.yNormalized;
@@ -122,6 +125,7 @@ int main() {
   bool open = true;
   bool pause = true;
   int x, y;
+  Graph grafico;
   std::vector<Sorgente> sorgenti;
   std::vector<Sorgente>::iterator itSorgenti;
   std::vector<PuntoDelCampo> punti;
@@ -170,12 +174,15 @@ int main() {
           case SDLK_i:
             open = true;
             break;
+	  case SDLK_k:
+	    grafico.puntiDelGrafico.clear();
+	    break;
           case SDLK_SPACE:
             addCaricaFunc(cariche, x, y);
             break;
-	  case SDLK_p:
-	    pause = !pause;
-	    break;
+          case SDLK_p:
+            pause = !pause;
+            break;
         }
       } else if (e.type == SDL_MOUSEBUTTONDOWN) {
       } else if (e.type == SDL_MOUSEWHEEL) {
@@ -249,7 +256,7 @@ int main() {
     ImGui::Text("Max Carica (Rendering)");
     ImGui::SliderFloat("maxCarica", &maxCarica, 0.001, 0.1);
     ImGui::Text("Colore base (Rendering)");
-    ImGui::SliderInt("coloreBase",&coloreBase, 0, 255);
+    ImGui::SliderInt("coloreBase", &coloreBase, 0, 255);
     ImGui::End();
 
     // Simulazione movimento cariche di prova
@@ -260,6 +267,8 @@ int main() {
            itCariche++) {
         itCariche->computeForces();
         itCariche->updatePosition(dt);
+
+	grafico.puntiDelGrafico.push_back(Point(itCariche->getPosition().x, itCariche->getPosition().y));
       }
     }
     stepTimer.start();
@@ -274,6 +283,7 @@ int main() {
       }
     }
 
+    grafico.render(gRenderer);
     // Rendering campo vettoriale
 
     for (it = punti.begin(); it != punti.end(); it++) {

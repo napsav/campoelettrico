@@ -1,3 +1,4 @@
+
 #pragma once
 #include <SDL2/SDL.h>
 
@@ -5,9 +6,9 @@
 
 #include "vector.h"
 
-class Carica {
+class CaricaLineaDiForza {
  public:
-  Carica(float xpos, float ypos, float carica);
+  CaricaLineaDiForza(float xpos, float ypos, float carica);
   vector2 getPosition();
   vector2 getVelocity();
   void computeForces();
@@ -20,7 +21,7 @@ class Carica {
 
  private:
   float charge;
-  float mass = 9.109389699e-17;
+  float mass = 9.109389699e-15;
   vector2 velocity;
   vector2 acceleration;
   vector2 position;

@@ -1,4 +1,5 @@
-#include "charge.h"
+
+#include "lineeDiForza.h"
 
 #include <SDL2/SDL.h>
 
@@ -9,7 +10,7 @@
 #include "settings.h"
 #include "sorgente.h"
 int raggio = 4;
-Carica::Carica(float xpos, float ypos, float carica) {
+CaricaLineaDiForza::CaricaLineaDiForza(float xpos, float ypos, float carica) {
   charge = carica;
 
   position.x = xpos;
@@ -19,19 +20,19 @@ Carica::Carica(float xpos, float ypos, float carica) {
             << std::endl;
 }
 
-vector2 Carica::getVelocity() { return velocity; }
+vector2 CaricaLineaDiForza::getVelocity() { return velocity; }
 
-vector2 Carica::getPosition() { return position; }
+vector2 CaricaLineaDiForza::getPosition() { return position; }
 
-vector2 Carica::getAcceleration() { return acceleration; }
+vector2 CaricaLineaDiForza::getAcceleration() { return acceleration; }
 
-float Carica::getCharge() { return charge; }
+float CaricaLineaDiForza::getCharge() { return charge; }
 
-void Carica::updatePosition(float dt) {
-  velocity.x = sommaForze.x * dt  ;
+void CaricaLineaDiForza::updatePosition(float dt) {
+  velocity.x += sommaForze.x * dt  ;
   position.x += velocity.x * dt* 1000 ;
 
-  velocity.y = sommaForze.y * dt;
+  velocity.y += sommaForze.y * dt;
   position.y += velocity.y * dt*1000;
   std::cout << "Posizione x : " << position.x << std::endl;
   std::cout << "Velocita x : " << velocity.x << std::endl;
@@ -43,13 +44,13 @@ void dividiForzaPerMassa(vector2 &forza, float massa) {
   forza.y = forza.y / massa;
 }
 
-void Carica::addForce(vector2 forza) {
+void CaricaLineaDiForza::addForce(vector2 forza) {
   std::cout << "Aggiunta forza x : " << forza.x << std::endl;
   forze.push_back(forza);
   std::cout << "Aggiunta accelerazione x : " << forza.x << std::endl;
 }
 
-void Carica::computeForces() {
+void CaricaLineaDiForza::computeForces() {
   for (it = forze.begin(); it != forze.end(); it++) {
     sommaForze.x += it->x;
     sommaForze.y += it->y;
@@ -63,12 +64,12 @@ void Carica::computeForces() {
   acceleration = sommaForze;
 }
 
-void Carica::render(SDL_Renderer *renderer) {
+void CaricaLineaDiForza::render(SDL_Renderer *renderer) {
   DrawCircle(renderer, position.x, position.y, raggio);
   SDL_RenderDrawLine(renderer, position.x, position.y,position.x + acceleration.x, position.y + acceleration.y);
 }
 
-void Carica::emptyVectors() {
+void CaricaLineaDiForza::emptyVectors() {
   forze.clear();
   sommaForze.x = 0;
   sommaForze.y = 0;
