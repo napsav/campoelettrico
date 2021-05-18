@@ -42,10 +42,10 @@ void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
       }
     } else if (e.button.button == SDL_BUTTON_RIGHT) {
       if (isInside(x, y, posizione.x, posizione.y, 10)) {
-        if (windowOpen) {
-          windowOpen = false;
-        } else {
+        if (!windowOpen) {
           windowOpen = true;
+        } else {
+          windowOpen = false;
         }
       } else {
         windowOpen = false;
@@ -59,16 +59,16 @@ void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
     }
   } else if (e.type == SDL_KEYDOWN) {
     switch (e.key.keysym.sym) {
-    case SDLK_z:
-      if (isInside(x, y, posizione.x, posizione.y, 10)) {
-        carica -= 0.1e-9;
-        break;
-      }
-    case SDLK_x:
-      if (isInside(x, y, posizione.x, posizione.y, 10)) {
-        carica += 0.1e-9;
-        break;
-      }
+      case SDLK_z:
+        if (isInside(x, y, posizione.x, posizione.y, 10)) {
+          carica -= 0.1e-9;
+          break;
+        }
+      case SDLK_x:
+        if (isInside(x, y, posizione.x, posizione.y, 10)) {
+          carica += 0.1e-9;
+          break;
+        }
     }
   }
 }
