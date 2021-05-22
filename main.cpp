@@ -23,6 +23,7 @@ int lunghezza = 10;
 int raggioSorgente = 10;
 float maxCarica = 0.05;
 int coloreBase = 0x14;
+bool drawGrid = true;
 const float caricaDiProva = 1.602176634e-19;
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -112,38 +113,38 @@ int main() {
         quit = true;
       } else if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
-          case SDLK_n:
-            addSorgenteFunc(sorgenti);
-            break;
-          case SDLK_UP:
-            lunghezza += 10;
-            break;
-          case SDLK_DOWN:
-            lunghezza -= 10;
-            break;
-          case SDLK_RIGHT:
-            densita += 2;
-            setDensity(punti, densita);
-            break;
-          case SDLK_LEFT:
-            densita -= 2;
-            setDensity(punti, densita);
-            break;
-          case SDLK_r:
-            sorgenti.clear();
-            break;
-          case SDLK_i:
-            open = true;
-            break;
-          case SDLK_k:
-            grafico.puntiDelGrafico.clear();
-            break;
-          case SDLK_SPACE:
-            addCaricaFunc(cariche, x, y);
-            break;
-          case SDLK_p:
-            pause = !pause;
-            break;
+        case SDLK_n:
+          addSorgenteFunc(sorgenti);
+          break;
+        case SDLK_UP:
+          lunghezza += 10;
+          break;
+        case SDLK_DOWN:
+          lunghezza -= 10;
+          break;
+        case SDLK_RIGHT:
+          densita += 2;
+          setDensity(punti, densita);
+          break;
+        case SDLK_LEFT:
+          densita -= 2;
+          setDensity(punti, densita);
+          break;
+        case SDLK_r:
+          sorgenti.clear();
+          break;
+        case SDLK_i:
+          open = true;
+          break;
+        case SDLK_k:
+          grafico.puntiDelGrafico.clear();
+          break;
+        case SDLK_SPACE:
+          addCaricaFunc(cariche, x, y);
+          break;
+        case SDLK_p:
+          pause = !pause;
+          break;
         }
       } else if (e.type == SDL_MOUSEBUTTONDOWN) {
       } else if (e.type == SDL_MOUSEWHEEL) {
@@ -185,9 +186,10 @@ int main() {
     ImGui::SliderInt("coloreBase", &coloreBase, 0, 255);
     ImGui::Text("Scala pixel (Rendering)");
     ImGui::SliderInt("scala", &scala, 1, 1000);
+    ImGui::Checkbox("Griglia", &drawGrid);
     ImGui::End();
 
-    SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+    SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderClear(gRenderer);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
@@ -229,10 +231,6 @@ int main() {
       ImGui::End();
     }
 
-    // --------------------------------------------
-    // TODO: Griglia pixel
-    // --------------------------------------------
-
     // Simulazione movimento cariche di prova
 
     float dt = stepTimer.getTicks() / 1000.f;
@@ -249,9 +247,9 @@ int main() {
     stepTimer.start();
 
     // RENDERING GRIGLIA
-
-    RenderGriglia(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT, scala);
-
+    if (drawGrid) {
+      RenderGriglia(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT, scala);
+    }
     // Rendering cariche di prova
     SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x80, 0xFF);
     if (cariche.size() > 0) {
