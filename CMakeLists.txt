@@ -20,6 +20,7 @@ ui/imgui_sdl.cpp
 ui/imgui_tables.cpp
 ui/imgui_widgets.cpp
 graph.cpp
+fisica.cpp
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
