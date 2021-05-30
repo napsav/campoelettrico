@@ -12,6 +12,7 @@ public:
   bool selected = false;
   void handleEnvent(SDL_Event &e, int x, int y);
   bool windowOpen = false;
+  void spawnCariche();
 
 private:
   vector2 posizione;

@@ -33,6 +33,10 @@ void Sorgente::setPosition(vector2 position) {
   posizione.y = position.y;
 }
 
+void Sorgente::spawnCariche() {
+
+}
+
 void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
   if (e.type == SDL_MOUSEBUTTONDOWN) {
     SDL_GetMouseState(&x, &y);
