@@ -4,10 +4,11 @@
 #include <vector>
 
 #include "vector.h"
+#include "settings.h"
 
 class Carica {
  public:
-  Carica(float xpos, float ypos, float carica);
+  Carica(float xpos, float ypos, float carica, float massa);
   vector2 getPosition();
   vector2 getVelocity();
   void computeForces();
@@ -20,7 +21,7 @@ class Carica {
 
  private:
   float charge;
-  float mass = 1e2;
+  float mass;
   vector2 velocity;
   vector2 acceleration;
   vector2 position;

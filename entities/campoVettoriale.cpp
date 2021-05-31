@@ -26,7 +26,7 @@ void PuntoDelCampo::computeVectors() {
   for (it = vettoriDaSommare.begin(); it != vettoriDaSommare.end(); it++) {
     sommaFinale.x += it->x;
     sommaFinale.y += it->y;
-    carica += it->intensita;
+    carica += it->modulo;
     normalizzando = normalize(sommaFinale);
     sommaFinale.xNormalized = normalizzando.xNormalized;
     sommaFinale.yNormalized = normalizzando.yNormalized;

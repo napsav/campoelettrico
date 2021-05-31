@@ -1,9 +1,12 @@
 #include <SDL2/SDL.h>
 
+#include "ui/imgui_impl_sdl.h"
 #include <cmath>
 #include <iostream>
 #include <vector>
-
+#define LOGVECTOR(vector) std::cout << "Vettore\tX: " vector.getPosition().x << "\tY: " << vector.getPosition().y << std::endl
+#define LOGXY(x, y) std::cout << "Coppia\tX: " << x << "\tY: " << y << std::endl
+#define COLORE(color) color[0] * 0xFF, color[1] * 0xFF, color[2] * 0xFF, color[3] * 0xFF
 #include "./draw.h"
 #include "./timer.h"
 #include "entities/campoVettoriale.h"
@@ -15,15 +18,21 @@
 #include "graph.h"
 #include "ui/imgui.h"
 #include "ui/imgui_sdl.h"
-int SCREEN_HEIGHT = 720;
-int SCREEN_WIDTH = 1280;
+unsigned int SCREEN_HEIGHT = 720;
+unsigned int SCREEN_WIDTH = 1280;
+float massa = 1e2;
+float coloreSfondo[4];
+float coloreCarica[4] = {0, 0, 1, 1};
+float coloreSorgente[4] = {1, 1, 1, 1};
+float coloreGrCariche[4] = {1, 1, 1, 1};
 int scala = 500;
 int densita = 16;
 int lunghezza = 10;
-int raggioSorgente = 10;
+int raggio = 10;
 float maxCarica = 0.05;
 int coloreBase = 0x14;
 bool drawGrid = true;
+bool drawCampoVettoriale = true;
 const float caricaDiProva = 1.602176634e-19;
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -31,7 +40,7 @@ SDL_Renderer *gRenderer = NULL;
 bool init() {
   bool success = true;
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0) {
-    printf("SDL could not be initialized, error: %s", SDL_GetError());
+    printf("SDL could not be initialized, error: %s\n", SDL_GetError());
     success = false;
   } else {
     gWindow = SDL_CreateWindow("Campo Elettrostatico", SDL_WINDOWPOS_UNDEFINED,
@@ -73,9 +82,8 @@ void addSorgenteFunc(std::vector<Sorgente> &array) {
 
 void addCaricaFunc(std::vector<Carica> &array, int x, int y) {
   array.push_back(
-      *new Carica(static_cast<float>(x), static_cast<float>(y), caricaDiProva));
-  std::cout << "aggiungo carica con posizione x " << x << " e posizione y " << y
-            << std::endl;
+      *new Carica(static_cast<float>(x), static_cast<float>(y), caricaDiProva, massa));
+  LOGXY(x, y);
 }
 
 int main() {
@@ -104,11 +112,17 @@ int main() {
   ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
   // carica caricaDiProva = {{600, 300}, {}};
   setDensity(punti, densita);
+  ImGuiIO &io = ImGui::GetIO();
+  (void)io;
+  ImGui_ImplSDL2_InitTest(gWindow);
+  io.WantCaptureKeyboard = true;
+
   while (!quit) {
-    ImGuiIO &io = ImGui::GetIO();
+
     int wheel = 0;
     SDL_GetMouseState(&x, &y);
     while (SDL_PollEvent(&e) != 0) {
+      ImGui_ImplSDL2_ProcessEvent(&e);
       if (e.type == SDL_QUIT) {
         quit = true;
       } else if (e.type == SDL_KEYDOWN) {
@@ -134,7 +148,7 @@ int main() {
           sorgenti.clear();
           break;
         case SDLK_i:
-          open = true;
+          open = !open;
           break;
         case SDLK_k:
           grafico.puntiDelGrafico.clear();
@@ -157,9 +171,9 @@ int main() {
     }
 
     // ImGUI input handling
-    const int buttons = SDL_GetMouseState(&x, &y);
 
-    io.DeltaTime = 1.0f / 60.0f;
+    const int buttons = SDL_GetMouseState(&x, &y);
+    io.DeltaTime = 1.0f / 1000.0f;
     io.MousePos = ImVec2(static_cast<float>(x), static_cast<float>(y));
     io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
     io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
@@ -173,23 +187,36 @@ int main() {
 
     ImGui::NewFrame();
     ImGui::Begin("Impostazioni", &open);
-    ImGui::Text("Densità campo vettoriale");
-    if (ImGui::SliderInt("densità", &densita, 4, 64))
-      setDensity(punti, densita);
-    ImGui::Text("Lunghezza vettori normalizzati");
-    ImGui::SliderInt("lunghezza", &lunghezza, 1, 30);
-    ImGui::Text("Raggio rappresentazione sorgenti");
-    ImGui::SliderInt("raggio", &raggioSorgente, 1, 30);
-    ImGui::Text("Max Carica (Rendering)");
-    ImGui::SliderFloat("maxCarica", &maxCarica, 0.001, 0.1);
-    ImGui::Text("Colore base (Rendering)");
-    ImGui::SliderInt("coloreBase", &coloreBase, 0, 255);
-    ImGui::Text("Scala pixel (Rendering)");
-    ImGui::SliderInt("scala", &scala, 1, 1000);
-    ImGui::Checkbox("Griglia", &drawGrid);
+    if (ImGui::CollapsingHeader("Opzioni principali", ImGuiTreeNodeFlags_None)) {
+
+      ImGui::Text("Massa cariche di prova");
+      ImGui::InputFloat("massa", &massa, 1e-5f, 1000.0f, "%e");
+      ImGui::Text("Densità campo vettoriale");
+      if (ImGui::SliderInt("densità", &densita, 4, 64))
+        setDensity(punti, densita);
+      ImGui::Text("Lunghezza vettori normalizzati");
+      ImGui::SliderInt("lunghezza", &lunghezza, 1, 30);
+      ImGui::Text("Raggio rappresentazione sorgenti");
+      ImGui::SliderInt("raggio", &raggio, 1, 30);
+    }
+    if (ImGui::CollapsingHeader("Opzioni visuali", ImGuiTreeNodeFlags_None)) {
+      ImGui::Text("Max Carica (Rendering)");
+      ImGui::InputFloat("maxCarica", &maxCarica, 0.001, 0.1, "%e");
+      ImGui::Text("Colore base (Rendering)");
+      ImGui::SliderInt("coloreBase", &coloreBase, 0, 255);
+      ImGui::Text("Scala pixel (Rendering)");
+      ImGui::SliderInt("scala", &scala, 1, 1000);
+      ImGui::Checkbox("Griglia", &drawGrid);
+      ImGui::Checkbox("Campo vettoriale", &drawCampoVettoriale);
+      ImGui::ColorEdit4("Colore sfondo", &coloreSfondo[0]);
+      ImGui::ColorEdit4("Colore cariche", &coloreCarica[0]);
+      ImGui::ColorEdit4("Colore sorgente", &coloreSorgente[0]);
+      ImGui::ColorEdit4("Colore grafico cariche", &coloreGrCariche[0]);
+    }
+
     ImGui::End();
 
-    SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0x00);
+    SDL_SetRenderDrawColor(gRenderer, COLORE(coloreSfondo));
     SDL_RenderClear(gRenderer);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
@@ -203,8 +230,10 @@ int main() {
         itSorgenti->setPosition(
             vector2{static_cast<float>(x), static_cast<float>(y)});
       }
-      for (it = punti.begin(); it != punti.end(); it++) {
-        simulazioneCampo(itSorgenti, it);
+      if (drawCampoVettoriale) {
+        for (it = punti.begin(); it != punti.end(); it++) {
+          simulazioneCampo(itSorgenti, it);
+        }
       }
 
       // Simulazione delle cariche di prova, non definitivo
@@ -213,22 +242,22 @@ int main() {
       if (cariche.size() > 0) {
         for (itCariche = cariche.begin(); itCariche != cariche.end();
              itCariche++) {
-          simulazioneCampo(itSorgenti, itCariche, cariche, raggioSorgente);
+          simulazioneCampo(itSorgenti, itCariche, cariche, raggio);
         }
       }
-      SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-      DrawCircle(gRenderer, itSorgenti->getPosition().x,
-                 itSorgenti->getPosition().y, raggioSorgente);
+      SDL_SetRenderDrawColor(gRenderer, COLORE(coloreSorgente));
+      itSorgenti->render(gRenderer);
 
       // --------------------------------------------
       // TODO: Finestra per la gestione delle cariche
       // --------------------------------------------
-
+      /*
       std::string titolo = "Carica " + std::to_string(index);
       ImGui::Begin(titolo.c_str(), &itSorgenti->windowOpen);
       // ImGui::SliderFloat("Carica", &itSorgenti->carica,
       // -10.0e-9, 10.0e-9);
       ImGui::End();
+      */
     }
 
     // Simulazione movimento cariche di prova
@@ -244,14 +273,16 @@ int main() {
             Point(itCariche->getPosition().x, itCariche->getPosition().y));
       }
     }
+
     stepTimer.start();
 
     // RENDERING GRIGLIA
     if (drawGrid) {
       RenderGriglia(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT, scala);
     }
+
     // Rendering cariche di prova
-    SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x80, 0xFF);
+    SDL_SetRenderDrawColor(gRenderer, COLORE(coloreCarica));
     if (cariche.size() > 0) {
       for (itCariche = cariche.begin(); itCariche != cariche.end();
            itCariche++) {
@@ -261,16 +292,18 @@ int main() {
     }
 
     // Rendering campo vettoriale
+    if (drawCampoVettoriale) {
 
-    for (it = punti.begin(); it != punti.end(); it++) {
-      it->computeVectors();
-      it->render(gRenderer);
-      it->emptyVectors();
+      for (it = punti.begin(); it != punti.end(); it++) {
+        it->computeVectors();
+        it->render(gRenderer);
+        it->emptyVectors();
+      }
     }
 
     // RENDERING GRAFICO
 
-    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_SetRenderDrawColor(gRenderer, COLORE(coloreGrCariche));
     grafico.render(gRenderer);
 
     // Rendering ImGUI

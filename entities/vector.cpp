@@ -10,7 +10,6 @@ vector2 normalize(vector2 daNormalizzare) {
   normalizzato.xNormalized = x / modulo;
   normalizzato.yNormalized = y / modulo;
   normalizzato.modulo = modulo;
-  normalizzato.intensita = daNormalizzare.intensita;
   return normalizzato;
 }
 

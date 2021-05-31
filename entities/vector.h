@@ -10,7 +10,6 @@ struct vector2 {
   float modulo = 0;
   float xNormalized = 0;
   float yNormalized = 0;
-  float intensita = 0;
 };
 
 vector2 distanza(vector2 a, vector2 b);

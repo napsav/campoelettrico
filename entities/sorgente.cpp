@@ -4,6 +4,8 @@
 
 #include "../ui/imgui.h"
 #include "vector.h"
+#include "settings.h"
+#include "../draw.h"
 
 bool isInside(float x, float y, float posx, float posy, float radius) {
   bool inside = true;
@@ -33,19 +35,24 @@ void Sorgente::setPosition(vector2 position) {
   posizione.y = position.y;
 }
 
-void Sorgente::spawnCariche() {
+void Sorgente::spawnLinee() {
 
+
+}
+
+void Sorgente::render(SDL_Renderer *renderer) {
+   DrawCircle(renderer, posizione.x ,posizione.y, raggio);
 }
 
 void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
   if (e.type == SDL_MOUSEBUTTONDOWN) {
     SDL_GetMouseState(&x, &y);
     if (e.button.button == SDL_BUTTON_LEFT) {
-      if (isInside(x, y, posizione.x, posizione.y, 10)) {
+      if (isInside(x, y, posizione.x, posizione.y, raggio)) {
         selected = true;
       }
     } else if (e.button.button == SDL_BUTTON_RIGHT) {
-      if (isInside(x, y, posizione.x, posizione.y, 10)) {
+      if (isInside(x, y, posizione.x, posizione.y, raggio)) {
         if(windowOpen) {
           windowOpen = false;
         } else {

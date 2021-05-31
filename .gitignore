@@ -8,3 +8,4 @@ imgui.ini
 .cache/
 *.swp
 .vscode/
+.kdev4/

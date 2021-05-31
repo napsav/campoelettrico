@@ -12,7 +12,8 @@ public:
   bool selected = false;
   void handleEnvent(SDL_Event &e, int x, int y);
   bool windowOpen = false;
-  void spawnCariche();
+  void spawnLinee();
+  void render(SDL_Renderer *renderer);
 
 private:
   vector2 posizione;

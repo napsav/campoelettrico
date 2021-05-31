@@ -19,6 +19,7 @@ ui/imgui_draw.cpp
 ui/imgui_sdl.cpp
 ui/imgui_tables.cpp
 ui/imgui_widgets.cpp
+ui/imgui_impl_sdl.cpp
 graph.cpp
 fisica.cpp
 )

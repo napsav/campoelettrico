@@ -35,17 +35,16 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
   //
   //
   // F = E*q
-
   if (distanzaVettore.modulo > raggioSorgente && !outOfBounds(it)) {
     valoreForzaCampo =
         costanteColoumb * (itSorgenti->getCharge() /
                            ((distanzaVettore.modulo * distanzaVettore.modulo) *
-                            (1.0 / (scala * scala))));
-    std::cout << "SCALA: " << (1.0 / (scala * scala)) << std::endl;
-    std::cout << "Valore: " << valoreForzaCampo << std::endl;
+                            (1.0f / (scala * scala))));
+
+    std::cout << "Valore: \t" << valoreForzaCampo << std::endl;
     intensita.x = valoreForzaCampo * distanzaVettore.xNormalized;
     intensita.y = valoreForzaCampo * distanzaVettore.yNormalized;
-    intensita.intensita = valoreForzaCampo;
+    intensita.modulo = valoreForzaCampo;
     it->addForce(intensita);
   } else {
     cariche.erase(it);
@@ -64,8 +63,8 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
       costanteColoumb * (itSorgenti->getCharge() /
                          (distanzaVettore.modulo * distanzaVettore.modulo));
 
-  intensita.x = valoreCampo * distanzaVettore.xNormalized * (1.0 / scala);
-  intensita.y = valoreCampo * distanzaVettore.yNormalized * (1.0 / scala);
-  intensita.intensita = valoreCampo;
+  intensita.x = valoreCampo * distanzaVettore.xNormalized * (1.0f / scala);
+  intensita.y = valoreCampo * distanzaVettore.yNormalized * (1.0f / scala);
+  intensita.modulo = valoreCampo;
   it->addVector2(intensita);
 }
