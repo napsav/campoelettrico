@@ -1,12 +1,16 @@
 #include <SDL2/SDL.h>
 
-#include "ui/imgui_impl_sdl.h"
 #include <cmath>
 #include <iostream>
 #include <vector>
-#define LOGVECTOR(vector) std::cout << "Vettore\tX: " vector.getPosition().x << "\tY: " << vector.getPosition().y << std::endl
+
+#include "ui/imgui_impl_sdl.h"
+#define LOGVECTOR(vector)                            \
+  std::cout << "Vettore\tX: " vector.getPosition().x \
+            << "\tY: " << vector.getPosition().y << std::endl
 #define LOGXY(x, y) std::cout << "Coppia\tX: " << x << "\tY: " << y << std::endl
-#define COLORE(color) color[0] * 0xFF, color[1] * 0xFF, color[2] * 0xFF, color[3] * 0xFF
+#define COLORE(color) \
+  color[0] * 0xFF, color[1] * 0xFF, color[2] * 0xFF, color[3] * 0xFF
 #include "./draw.h"
 #include "./timer.h"
 #include "entities/campoVettoriale.h"
@@ -23,6 +27,7 @@ float costanteColoumb = 8.987551792314e9;
 unsigned int SCREEN_HEIGHT = 720;
 unsigned int SCREEN_WIDTH = 1280;
 float massa = 1e2;
+float densitaLinee = 10;
 float coloreSfondo[4];
 float coloreCarica[4] = {0, 0, 1, 1};
 float coloreSorgente[4] = {1, 1, 1, 1};
@@ -83,8 +88,8 @@ void addSorgenteFunc(std::vector<Sorgente> &array) {
 }
 
 void addCaricaFunc(std::vector<Carica> &array, int x, int y) {
-  array.push_back(
-      *new Carica(static_cast<float>(x), static_cast<float>(y), caricaDiProva, massa));
+  array.push_back(*new Carica(static_cast<float>(x), static_cast<float>(y),
+                              caricaDiProva, massa));
   LOGXY(x, y);
 }
 
@@ -106,6 +111,7 @@ int main() {
   std::vector<PuntoDelCampo>::iterator it;
   std::vector<Carica>::iterator itCariche;
   std::vector<Carica> cariche;
+  std::vector<CaricaLineaDiForza> lineeDiForza;
   Sorgente sorgentePrima = Sorgente({200, 300}, 2.5e-9);
   Sorgente sorgenteSeconda = Sorgente({350, 300}, 5.2e-8);
   sorgenti.push_back(sorgentePrima);
@@ -118,9 +124,7 @@ int main() {
   (void)io;
   ImGui_ImplSDL2_InitTest(gWindow);
   io.WantCaptureKeyboard = true;
-  CaricaLineaDiForza linea(280, 300);
   while (!quit) {
-
     int wheel = 0;
     SDL_GetMouseState(&x, &y);
     while (SDL_PollEvent(&e) != 0) {
@@ -129,38 +133,38 @@ int main() {
         quit = true;
       } else if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
-        case SDLK_n:
-          addSorgenteFunc(sorgenti);
-          break;
-        case SDLK_UP:
-          lunghezza += 10;
-          break;
-        case SDLK_DOWN:
-          lunghezza -= 10;
-          break;
-        case SDLK_RIGHT:
-          densita += 2;
-          setDensity(punti, densita);
-          break;
-        case SDLK_LEFT:
-          densita -= 2;
-          setDensity(punti, densita);
-          break;
-        case SDLK_r:
-          sorgenti.clear();
-          break;
-        case SDLK_i:
-          open = !open;
-          break;
-        case SDLK_k:
-          grafico.puntiDelGrafico.clear();
-          break;
-        case SDLK_SPACE:
-          addCaricaFunc(cariche, x, y);
-          break;
-        case SDLK_p:
-          pause = !pause;
-          break;
+          case SDLK_n:
+            addSorgenteFunc(sorgenti);
+            break;
+          case SDLK_UP:
+            lunghezza += 10;
+            break;
+          case SDLK_DOWN:
+            lunghezza -= 10;
+            break;
+          case SDLK_RIGHT:
+            densita += 2;
+            setDensity(punti, densita);
+            break;
+          case SDLK_LEFT:
+            densita -= 2;
+            setDensity(punti, densita);
+            break;
+          case SDLK_r:
+            sorgenti.clear();
+            break;
+          case SDLK_i:
+            open = !open;
+            break;
+          case SDLK_k:
+            grafico.puntiDelGrafico.clear();
+            break;
+          case SDLK_SPACE:
+            addCaricaFunc(cariche, x, y);
+            break;
+          case SDLK_p:
+            pause = !pause;
+            break;
         }
       } else if (e.type == SDL_MOUSEBUTTONDOWN) {
       } else if (e.type == SDL_MOUSEWHEEL) {
@@ -189,10 +193,19 @@ int main() {
 
     ImGui::NewFrame();
     ImGui::Begin("Impostazioni", &open);
-    if (ImGui::CollapsingHeader("Opzioni principali", ImGuiTreeNodeFlags_None)) {
-
+    if (ImGui::CollapsingHeader("Opzioni principali",
+                                ImGuiTreeNodeFlags_None)) {
       ImGui::Text("Massa cariche di prova");
       ImGui::InputFloat("massa", &massa, 1e-5f, 1000.0f, "%e");
+      ImGui::Text("Linee di forza step max");
+      ImGui::InputInt("maxStep", &maxStep, 1, 10000);
+
+      ImGui::Text("Densità linee");
+      ImGui::InputFloat("densitaLinee", &densitaLinee, 0.1, 100);
+
+      ImGui::Text("Dettaglio linee di forza");
+      ImGui::InputFloat("salto", &salto, 0.1, 100);
+
       ImGui::Text("Densità campo vettoriale");
       if (ImGui::SliderInt("densità", &densita, 4, 64))
         setDensity(punti, densita);
@@ -237,6 +250,14 @@ int main() {
           simulazioneCampo(itSorgenti, it);
         }
       }
+      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x+raggio, itSorgenti->getPosition().y+raggio));
+      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x-raggio, itSorgenti->getPosition().y-raggio));
+      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x-raggio, itSorgenti->getPosition().y+raggio));
+      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x+raggio, itSorgenti->getPosition().y-raggio));
+      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x+raggio, itSorgenti->getPosition().y));
+      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x, itSorgenti->getPosition().y+raggio));
+      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x-raggio, itSorgenti->getPosition().y));
+      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x, itSorgenti->getPosition().y-raggio));
 
       // Simulazione delle cariche di prova, non definitivo
       // (da unire con l'altra funzione o creare classe base)
@@ -295,7 +316,6 @@ int main() {
 
     // Rendering campo vettoriale
     if (drawCampoVettoriale) {
-
       for (it = punti.begin(); it != punti.end(); it++) {
         it->computeVectors();
         it->render(gRenderer);
@@ -307,10 +327,16 @@ int main() {
 
     SDL_SetRenderDrawColor(gRenderer, COLORE(coloreGrCariche));
     grafico.render(gRenderer);
-    linea.computeVectors(sorgenti);
-    linea.render(gRenderer);
-    linea.emptyVectors();
+
     // Rendering ImGUI
+
+    for(auto linea : lineeDiForza) {
+	    linea.computeVectors(sorgenti);
+	    linea.render(gRenderer);
+	    linea.emptyVectors();
+    }
+    lineeDiForza.clear();
+
 
     ImGui::Render();
     ImGuiSDL::Render(ImGui::GetDrawData());

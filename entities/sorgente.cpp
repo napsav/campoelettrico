@@ -7,6 +7,7 @@
 #include "settings.h"
 #include "lineeDiForza.h"
 #include "../draw.h"
+#include "lineeDiForza.h"
 
 bool isInside(float x, float y, float posx, float posy, float radius) {
   bool inside = true;
@@ -21,6 +22,7 @@ bool isInside(float x, float y, float posx, float posy, float radius) {
   }
   return inside;
 }
+
 
 Sorgente::Sorgente(vector2 pos, float coloumb) {
   posizione = pos;
@@ -37,8 +39,6 @@ void Sorgente::setPosition(vector2 position) {
 }
 
 void Sorgente::spawnLinee() {
-
-
 }
 
 void Sorgente::render(SDL_Renderer *renderer) {
@@ -53,6 +53,7 @@ void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
         selected = true;
       }
     } else if (e.button.button == SDL_BUTTON_RIGHT) {
+	    this->spawnLinee();
       if (isInside(x, y, posizione.x, posizione.y, raggio)) {
         if(windowOpen) {
           windowOpen = false;

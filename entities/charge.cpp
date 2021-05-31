@@ -2,13 +2,13 @@
 
 #include <SDL2/SDL.h>
 
+#include "sorgente.h"
 #include <iostream>
 #include <vector>
 #define LOGVECTOR(stringa, vec) std::cout << stringa << "\tX: "<< vec.x << "\tY: " << vec.y << std::endl;
 #define LOGXY(x,y) std::cout << "Coppia\tX: "<< x << "\tY: " << y << std::endl;
 #include "../draw.h"
 #include "settings.h"
-#include "sorgente.h"
 int raggioCarica = 4;
 Carica::Carica(float xpos, float ypos, float carica, float massa) {
     mass = massa;

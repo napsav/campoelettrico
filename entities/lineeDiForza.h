@@ -14,15 +14,15 @@
 class CaricaLineaDiForza {
 public:
   CaricaLineaDiForza(float xpos, float ypos);
-  void computeVectors(std::vector<Sorgente> Sorgenti);
+  void computeVectors(std::vector<Sorgente> &Sorgenti);
   void render(SDL_Renderer *renderer);
   void addForce(vector2 vettore);
   void emptyVectors();
+  void changePosizioneIniziale();
 
 private:
+  vector2 posizioneIniziale;
   int currentStep = 0;
-  int maxStep = 100;
-  static int salto;
   vector2 campoelettrico;
   vector2 position;
   Graph ramo;
