@@ -15,3 +15,7 @@ extern float salto;
 extern float costanteColoumb;
 extern int maxStep;
 extern float densitaLinee;
+extern float coloreBaseRGB[4];
+extern float coloreGrigliaSecondario[4];
+extern float coloreGrigliaPrimario[4];
+extern float coloreLinee[4];

@@ -17,6 +17,32 @@ bool outOfBounds(std::vector<Carica>::iterator it) {
   }
   return outside;
 }
+void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti, std::vector<vector2> &mouseVector, float x, float y) {
+  vector2 intensita;
+  float valoreForzaCampo;
+  vector2 distanzaVettore =
+      distanza(itSorgenti->getPosition(), {x, y});
+
+  // LEGGE DI COLOUMB:
+  //
+  // F(1->2) = k*(Q1*Q2)
+  //             ------
+  //               r^2
+  // F = E*q
+
+  // Se la carica di prova si trova entro un certo raggio della sorgente, o se si trova fuori dallo schermo, viene eliminata per risparmiare risorse
+
+  valoreForzaCampo =
+      costanteColoumb * (itSorgenti->getCharge() /
+                         ((distanzaVettore.modulo * distanzaVettore.modulo) *
+                          (1.0f / (scala * scala))));
+
+  std::cout << "Valore mouse: \t" << valoreForzaCampo << std::endl;
+  intensita.x = valoreForzaCampo * distanzaVettore.xNormalized;
+  intensita.y = valoreForzaCampo * distanzaVettore.yNormalized;
+  intensita.modulo = valoreForzaCampo;
+  mouseVector.push_back(intensita);
+}
 
 void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
                       std::vector<Carica>::iterator &it,
@@ -28,12 +54,13 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
 
   // LEGGE DI COLOUMB:
   //
-  //
   // F(1->2) = k*(Q1*Q2)
   //             ------
   //               r^2
-  //
   // F = E*q
+
+  // Se la carica di prova si trova entro un certo raggio della sorgente, o se si trova fuori dallo schermo, viene eliminata per risparmiare risorse
+
   if (distanzaVettore.modulo > raggio && !outOfBounds(it)) {
     valoreForzaCampo =
         costanteColoumb * (itSorgenti->getCharge() /

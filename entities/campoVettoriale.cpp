@@ -5,7 +5,8 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
-
+#define COLORE(color) \
+  color[0] * 0xFF, color[1] * 0xFF, color[2] * 0xFF, color[3] * 0xFF
 #include "settings.h"
 #include "sorgente.h"
 #include "vector.h"
@@ -45,20 +46,20 @@ void PuntoDelCampo::render(SDL_Renderer *renderer) {
     if (carica > maxCarica) {
       carica = maxCarica;
     }
-    if ((abs(carica) / maxCarica)*0xFF < coloreBase) {
-      SDL_SetRenderDrawColor(renderer, coloreBase, 0x00, 0x00, 0xFF);
+    if ((abs(carica) / maxCarica) * 0xFF < coloreBase) {
+      SDL_SetRenderDrawColor(renderer, COLORE(coloreBaseRGB));
     } else {
-      SDL_SetRenderDrawColor(renderer, 0x00, (carica / maxCarica) * 0xFF, 0x00,
+      SDL_SetRenderDrawColor(renderer, 0x00, ((carica / maxCarica) * 0xBF), 0x00,
                              0xFF);
     }
   } else {
     if (abs(carica) > maxCarica) {
       carica = maxCarica;
     }
-    if ((abs(carica) / maxCarica)*0xFF < coloreBase) {
-      SDL_SetRenderDrawColor(renderer, coloreBase, 0x00, 0x00, 0xFF);
+    if ((abs(carica) / maxCarica) * 0xFF < coloreBase) {
+      SDL_SetRenderDrawColor(renderer, COLORE(coloreBaseRGB));
     } else {
-      SDL_SetRenderDrawColor(renderer, (abs(carica) / maxCarica) * 0xFF, 0x00,
+      SDL_SetRenderDrawColor(renderer, ((abs(carica) / maxCarica) * 0xFF), 0x00,
                              0x00, 0xFF);
     }
   }

@@ -8,6 +8,7 @@
 
 //void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
 //                      std::vector<CaricaLineaDiForza>::iterator &it);
+void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti, std::vector<vector2> &mouseVector, float x, float y);
 void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
                       std::vector<Carica>::iterator &it,
                       std::vector<Carica> &cariche);

@@ -29,3 +29,5 @@ private:
   std::vector<vector2>::iterator it;
   std::vector<vector2> vettori;
 };
+
+void spawnLinee(std::vector<CaricaLineaDiForza> &linee, std::vector<Sorgente>::iterator &it);

@@ -27,17 +27,21 @@ float costanteColoumb = 8.987551792314e9;
 unsigned int SCREEN_HEIGHT = 720;
 unsigned int SCREEN_WIDTH = 1280;
 float massa = 1e2;
-float densitaLinee = 10;
-float coloreSfondo[4];
-float coloreCarica[4] = {0, 0, 1, 1};
-float coloreSorgente[4] = {1, 1, 1, 1};
-float coloreGrCariche[4] = {1, 1, 1, 1};
+float densitaLinee = 1e8;
+float coloreGrigliaPrimario[4] = {0.559, 0.559, 0.559, 1};
+float coloreGrigliaSecondario[4] = {0.784, 0.784, 0.784, 1};
+float coloreSfondo[4] = {1, 1, 1, 1};
+float coloreCarica[4] = {1, 0, 0, 1};
+float coloreSorgente[4] = {0, 0, 0, 1};
+float coloreGrCariche[4] = {0, 0, 0, 1};
+float coloreLinee[4] = {0, 0, 0, 1};
+float coloreBaseRGB[4] = {0.710, 0.710, 0.710, 1};
 int scala = 500;
 int densita = 16;
 int lunghezza = 10;
 int raggio = 10;
 float maxCarica = 0.05;
-int coloreBase = 0x14;
+int coloreBase = 0xFF;
 bool drawGrid = true;
 bool drawCampoVettoriale = true;
 const float caricaDiProva = 1.602176634e-19;
@@ -105,6 +109,7 @@ int main() {
   bool pause = true;
   int x, y;
   Graph grafico;
+  vector2 intensitaMouse = {0, 0};
   std::vector<Sorgente> sorgenti;
   std::vector<Sorgente>::iterator itSorgenti;
   std::vector<PuntoDelCampo> punti;
@@ -112,6 +117,7 @@ int main() {
   std::vector<Carica>::iterator itCariche;
   std::vector<Carica> cariche;
   std::vector<CaricaLineaDiForza> lineeDiForza;
+  std::vector<vector2> mouseVector;
   Sorgente sorgentePrima = Sorgente({200, 300}, 2.5e-9);
   Sorgente sorgenteSeconda = Sorgente({350, 300}, 5.2e-8);
   sorgenti.push_back(sorgentePrima);
@@ -121,6 +127,7 @@ int main() {
   // carica caricaDiProva = {{600, 300}, {}};
   setDensity(punti, densita);
   ImGuiIO &io = ImGui::GetIO();
+  ImGui::StyleColorsLight();
   (void)io;
   ImGui_ImplSDL2_InitTest(gWindow);
   io.WantCaptureKeyboard = true;
@@ -133,38 +140,38 @@ int main() {
         quit = true;
       } else if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
-          case SDLK_n:
-            addSorgenteFunc(sorgenti);
-            break;
-          case SDLK_UP:
-            lunghezza += 10;
-            break;
-          case SDLK_DOWN:
-            lunghezza -= 10;
-            break;
-          case SDLK_RIGHT:
-            densita += 2;
-            setDensity(punti, densita);
-            break;
-          case SDLK_LEFT:
-            densita -= 2;
-            setDensity(punti, densita);
-            break;
-          case SDLK_r:
-            sorgenti.clear();
-            break;
-          case SDLK_i:
-            open = !open;
-            break;
-          case SDLK_k:
-            grafico.puntiDelGrafico.clear();
-            break;
-          case SDLK_SPACE:
-            addCaricaFunc(cariche, x, y);
-            break;
-          case SDLK_p:
-            pause = !pause;
-            break;
+        case SDLK_n:
+          addSorgenteFunc(sorgenti);
+          break;
+        case SDLK_UP:
+          lunghezza += 10;
+          break;
+        case SDLK_DOWN:
+          lunghezza -= 10;
+          break;
+        case SDLK_RIGHT:
+          densita += 2;
+          setDensity(punti, densita);
+          break;
+        case SDLK_LEFT:
+          densita -= 2;
+          setDensity(punti, densita);
+          break;
+        case SDLK_r:
+          sorgenti.clear();
+          break;
+        case SDLK_i:
+          open = !open;
+          break;
+        case SDLK_k:
+          grafico.puntiDelGrafico.clear();
+          break;
+        case SDLK_SPACE:
+          addCaricaFunc(cariche, x, y);
+          break;
+        case SDLK_p:
+          pause = !pause;
+          break;
         }
       } else if (e.type == SDL_MOUSEBUTTONDOWN) {
       } else if (e.type == SDL_MOUSEWHEEL) {
@@ -193,6 +200,7 @@ int main() {
 
     ImGui::NewFrame();
     ImGui::Begin("Impostazioni", &open);
+    ImGui::Text("Intensità campo elettrico nel cursore totale: %f C", intensitaMouse.modulo);
     if (ImGui::CollapsingHeader("Opzioni principali",
                                 ImGuiTreeNodeFlags_None)) {
       ImGui::Text("Massa cariche di prova");
@@ -201,7 +209,7 @@ int main() {
       ImGui::InputInt("maxStep", &maxStep, 1, 10000);
 
       ImGui::Text("Densità linee");
-      ImGui::InputFloat("densitaLinee", &densitaLinee, 0.1, 100);
+      ImGui::InputFloat("densitaLinee", &densitaLinee, 1e2, 1e24, "%e");
 
       ImGui::Text("Dettaglio linee di forza");
       ImGui::InputFloat("salto", &salto, 0.1, 100);
@@ -227,10 +235,13 @@ int main() {
       ImGui::ColorEdit4("Colore cariche", &coloreCarica[0]);
       ImGui::ColorEdit4("Colore sorgente", &coloreSorgente[0]);
       ImGui::ColorEdit4("Colore grafico cariche", &coloreGrCariche[0]);
+      ImGui::ColorEdit4("Colore base vettori", &coloreBaseRGB[0]);
+      ImGui::ColorEdit4("Colore griglia primario", &coloreGrigliaPrimario[0]);
+      ImGui::ColorEdit4("Colore griglia secondario", &coloreGrigliaSecondario[0]);
+      ImGui::ColorEdit4("Colore linee di campo", &coloreLinee[0]);
     }
 
     ImGui::End();
-
     SDL_SetRenderDrawColor(gRenderer, COLORE(coloreSfondo));
     SDL_RenderClear(gRenderer);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -250,18 +261,12 @@ int main() {
           simulazioneCampo(itSorgenti, it);
         }
       }
-      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x+raggio, itSorgenti->getPosition().y+raggio));
-      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x-raggio, itSorgenti->getPosition().y-raggio));
-      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x-raggio, itSorgenti->getPosition().y+raggio));
-      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x+raggio, itSorgenti->getPosition().y-raggio));
-      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x+raggio, itSorgenti->getPosition().y));
-      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x, itSorgenti->getPosition().y+raggio));
-      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x-raggio, itSorgenti->getPosition().y));
-      lineeDiForza.push_back(CaricaLineaDiForza(itSorgenti->getPosition().x, itSorgenti->getPosition().y-raggio));
+      spawnLinee(lineeDiForza, itSorgenti);
+      //lineeDiForza.push_back(CaricaLineaDiForza(it->getPosition().x + raggio, it->getPosition().y + raggio));
 
       // Simulazione delle cariche di prova, non definitivo
       // (da unire con l'altra funzione o creare classe base)
-
+      simulazioneCampo(itSorgenti, mouseVector, x, y);
       if (cariche.size() > 0) {
         for (itCariche = cariche.begin(); itCariche != cariche.end();
              itCariche++) {
@@ -270,17 +275,6 @@ int main() {
       }
       SDL_SetRenderDrawColor(gRenderer, COLORE(coloreSorgente));
       itSorgenti->render(gRenderer);
-
-      // --------------------------------------------
-      // TODO: Finestra per la gestione delle cariche
-      // --------------------------------------------
-      /*
-      std::string titolo = "Carica " + std::to_string(index);
-      ImGui::Begin(titolo.c_str(), &itSorgenti->windowOpen);
-      // ImGui::SliderFloat("Carica", &itSorgenti->carica,
-      // -10.0e-9, 10.0e-9);
-      ImGui::End();
-      */
     }
 
     // Simulazione movimento cariche di prova
@@ -323,20 +317,32 @@ int main() {
       }
     }
 
+    for (auto vec : mouseVector) {
+      intensitaMouse.x += vec.x;
+      intensitaMouse.y += vec.y;
+    }
+
+    intensitaMouse.modulo = sqrt((intensitaMouse.x * intensitaMouse.x) + (intensitaMouse.y * intensitaMouse.y));
+    intensitaMouse.x = 0;
+    intensitaMouse.y = 0;
+    mouseVector.clear();
+
     // RENDERING GRAFICO
 
     SDL_SetRenderDrawColor(gRenderer, COLORE(coloreGrCariche));
     grafico.render(gRenderer);
 
-    // Rendering ImGUI
+    // LINEE DI CAMPO
 
-    for(auto linea : lineeDiForza) {
-	    linea.computeVectors(sorgenti);
-	    linea.render(gRenderer);
-	    linea.emptyVectors();
+    SDL_SetRenderDrawColor(gRenderer, COLORE(coloreLinee));
+    for (auto linea : lineeDiForza) {
+      linea.computeVectors(sorgenti);
+      linea.render(gRenderer);
+      linea.emptyVectors();
     }
     lineeDiForza.clear();
 
+    // Rendering ImGUI
 
     ImGui::Render();
     ImGuiSDL::Render(ImGui::GetDrawData());
