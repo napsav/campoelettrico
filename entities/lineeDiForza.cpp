@@ -4,74 +4,62 @@
 #include <SDL2/SDL.h>
 
 #include <iostream>
+#include <math.h>
 #include <vector>
+#define LOGVECTOR(stringa, vec) std::cout << stringa << "\tX: " << vec.x << "\tY: " << vec.y << std::endl;
 
-#include "../draw.h"
-#include "settings.h"
-#include "sorgente.h"
-int raggio = 4;
-CaricaLineaDiForza::CaricaLineaDiForza(float xpos, float ypos, float carica) {
-  charge = carica;
+int CaricaLineaDiForza::salto = 1;
 
+CaricaLineaDiForza::CaricaLineaDiForza(float xpos, float ypos) {
+  campoelettrico.x = xpos;
+  campoelettrico.y = ypos;
   position.x = xpos;
   position.y = ypos;
-  std::cout << "COSTRUTTORE carica con posizione x " << position.x
-            << " e posizione y " << position.y << " - CARICA: " << charge
-            << std::endl;
+  std::cout << "COSTRUTTORE Linea di forza posizione x " << position.x
+            << " e posizione y " << position.y << std::endl;
 }
 
-vector2 CaricaLineaDiForza::getVelocity() { return velocity; }
-
-vector2 CaricaLineaDiForza::getPosition() { return position; }
-
-vector2 CaricaLineaDiForza::getAcceleration() { return acceleration; }
-
-float CaricaLineaDiForza::getCharge() { return charge; }
-
-void CaricaLineaDiForza::updatePosition(float dt) {
-  velocity.x += sommaForze.x * dt  ;
-  position.x += (velocity.x * dt) * scala;
-
-  velocity.y += sommaForze.y * dt;
-  position.y += (velocity.y * dt) * scala;
-  std::cout << "Posizione x : " << position.x << std::endl;
-  std::cout << "Velocita x : " << velocity.x << std::endl;
+void CaricaLineaDiForza::addForce(vector2 vettore) {
+  vettori.push_back(vettore);
 }
 
-void dividiForzaPerMassa(vector2 &forza, float massa) {
-  std::cout << "Divido per massa: " << massa << std::endl;
-  forza.x = forza.x / massa;
-  forza.y = forza.y / massa;
-}
+void CaricaLineaDiForza::computeVectors(std::vector<Sorgente> Sorgenti) {
+  for (currentStep; currentStep < maxStep; currentStep++) {
+    for (auto sorgente : Sorgenti) {
+      vector2 intensita;
+      float valoreForzaCampo;
+      vector2 distanzaVettore = distanza(sorgente.getPosition(), campoelettrico);
+      valoreForzaCampo =
+          costanteColoumb * (sorgente.getCharge() /
+                             ((distanzaVettore.modulo * distanzaVettore.modulo) *
+                              (1.0f / (scala * scala))));
 
-void CaricaLineaDiForza::addForce(vector2 forza) {
-  std::cout << "Aggiunta forza x : " << forza.x << std::endl;
-  forze.push_back(forza);
-  std::cout << "Aggiunta accelerazione x : " << forza.x << std::endl;
-}
-
-void CaricaLineaDiForza::computeForces() {
-  for (it = forze.begin(); it != forze.end(); it++) {
-    sommaForze.x += it->x;
-    sommaForze.y += it->y;
-    std::cout << "Somma forze:" << sommaForze.x << std::endl;
+      std::cout << "Valore(linea): \t" << valoreForzaCampo << std::endl;
+      intensita.x = valoreForzaCampo * distanzaVettore.xNormalized;
+      intensita.y = valoreForzaCampo * distanzaVettore.yNormalized;
+      intensita.modulo = valoreForzaCampo;
+      this->addForce(intensita);
+    }
+    for (it = vettori.begin(); it != vettori.end(); it++) {
+      campoelettrico.x += it->x;
+      campoelettrico.y += it->y;
+    }
+    campoelettrico.modulo = sqrt((campoelettrico.x * campoelettrico.x) + (campoelettrico.y * campoelettrico.y));
+    position.x += CaricaLineaDiForza::salto * ((campoelettrico.x) / (campoelettrico.modulo));
+    position.y += CaricaLineaDiForza::salto * ((campoelettrico.y) / (campoelettrico.modulo));
+    Point delta(position.y, position.x);
+    LOGVECTOR("Punto linea " << currentStep, delta);
+    ramo.puntiDelGrafico.push_back(delta);
   }
-
-  dividiForzaPerMassa(sommaForze, mass);
-//  acceleration.x += sommaForze.x;
-//  acceleration.y += sommaForze.y;
-
-  acceleration = sommaForze;
 }
 
 void CaricaLineaDiForza::render(SDL_Renderer *renderer) {
-  DrawCircle(renderer, position.x, position.y, raggio);
-  SDL_RenderDrawLine(renderer, position.x, position.y,position.x + acceleration.x, position.y + acceleration.y);
+  ramo.render(renderer);
 }
 
 void CaricaLineaDiForza::emptyVectors() {
-  forze.clear();
-  sommaForze.x = 0;
-  sommaForze.y = 0;
+  vettori.clear();
+  campoelettrico.x = 0;
+  campoelettrico.y = 0;
+  campoelettrico.modulo = 0;
 }
-

@@ -20,7 +20,7 @@ bool outOfBounds(std::vector<Carica>::iterator it) {
 
 void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
                       std::vector<Carica>::iterator &it,
-                      std::vector<Carica> &cariche, int raggioSorgente) {
+                      std::vector<Carica> &cariche) {
   vector2 intensita;
   float valoreForzaCampo;
   vector2 distanzaVettore =
@@ -33,9 +33,8 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
   //             ------
   //               r^2
   //
-  //
   // F = E*q
-  if (distanzaVettore.modulo > raggioSorgente && !outOfBounds(it)) {
+  if (distanzaVettore.modulo > raggio && !outOfBounds(it)) {
     valoreForzaCampo =
         costanteColoumb * (itSorgenti->getCharge() /
                            ((distanzaVettore.modulo * distanzaVettore.modulo) *

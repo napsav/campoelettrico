@@ -12,6 +12,7 @@ entities/sorgente.cpp
 entities/campoVettoriale.cpp
 entities/vector.cpp
 entities/charge.cpp
+entities/lineeDiForza.cpp
 ui/imgui_sdl.cpp
 ui/imgui.cpp
 ui/imgui_demo.cpp

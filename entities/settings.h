@@ -10,4 +10,6 @@ extern float coloreSfondo[4];
 extern float coloreSorgente[4];
 extern float coloreCarica[4];
 extern unsigned int SCREEN_WIDTH;
-extern unsigned int SCREEN_HEIGHT ;
+extern unsigned int SCREEN_HEIGHT;
+extern int salto;
+extern float costanteColoumb;

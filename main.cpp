@@ -11,6 +11,7 @@
 #include "./timer.h"
 #include "entities/campoVettoriale.h"
 #include "entities/charge.h"
+#include "entities/lineeDiForza.h"
 #include "entities/settings.h"
 #include "entities/sorgente.h"
 #include "entities/vector.h"
@@ -18,6 +19,7 @@
 #include "graph.h"
 #include "ui/imgui.h"
 #include "ui/imgui_sdl.h"
+float costanteColoumb = 8.987551792314e9;
 unsigned int SCREEN_HEIGHT = 720;
 unsigned int SCREEN_WIDTH = 1280;
 float massa = 1e2;
@@ -116,7 +118,7 @@ int main() {
   (void)io;
   ImGui_ImplSDL2_InitTest(gWindow);
   io.WantCaptureKeyboard = true;
-
+  CaricaLineaDiForza linea(280, 300);
   while (!quit) {
 
     int wheel = 0;
@@ -242,7 +244,7 @@ int main() {
       if (cariche.size() > 0) {
         for (itCariche = cariche.begin(); itCariche != cariche.end();
              itCariche++) {
-          simulazioneCampo(itSorgenti, itCariche, cariche, raggio);
+          simulazioneCampo(itSorgenti, itCariche, cariche);
         }
       }
       SDL_SetRenderDrawColor(gRenderer, COLORE(coloreSorgente));
@@ -305,7 +307,9 @@ int main() {
 
     SDL_SetRenderDrawColor(gRenderer, COLORE(coloreGrCariche));
     grafico.render(gRenderer);
-
+    linea.computeVectors(sorgenti);
+    linea.render(gRenderer);
+    linea.emptyVectors();
     // Rendering ImGUI
 
     ImGui::Render();

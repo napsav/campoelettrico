@@ -5,6 +5,7 @@
 #include "../ui/imgui.h"
 #include "vector.h"
 #include "settings.h"
+#include "lineeDiForza.h"
 #include "../draw.h"
 
 bool isInside(float x, float y, float posx, float posy, float radius) {
