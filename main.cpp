@@ -1,10 +1,11 @@
 #include <SDL2/SDL.h>
 
-#include "ui/imgui_impl_sdl.h"
 #include <cmath>
 #include <iostream>
 #include <sstream>
 #include <vector>
+
+#include "ui/imgui_impl_sdl.h"
 #define LOGVECTOR(vector)                            \
   std::cout << "Vettore\tX: " vector.getPosition().x \
             << "\tY: " << vector.getPosition().y << std::endl
@@ -29,7 +30,7 @@ unsigned int SCREEN_WIDTH = 1280;
 vector2 caricaNuova = {226.97501, 300};
 float massa = 1e4;
 float densitaLinee = 1e8;
-int scala = 500;
+int scala = 1000;
 int densita = 16;
 int lunghezza = 10;
 int raggio = 10;
@@ -40,7 +41,7 @@ bool sorgentiColoreSegno = false;
 bool drawLineeDiCampo = true;
 bool drawSorgenti = true;
 bool drawGraficoCariche = true;
-bool darkMode = false;
+bool darkMode = true;
 bool abilitaLog = false;
 float caricaDiProva = 1.602176634e-19;
 SDL_Window *gWindow = NULL;
@@ -52,9 +53,10 @@ bool init() {
     printf("SDL could not be initialized, error: %s\n", SDL_GetError());
     success = false;
   } else {
-    gWindow = SDL_CreateWindow("Campo Elettrostatico", SDL_WINDOWPOS_UNDEFINED,
-                               SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH,
-                               SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    gWindow =
+        SDL_CreateWindow("Campo Elettrostatico", SDL_WINDOWPOS_UNDEFINED,
+                         SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
+                         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (gWindow == NULL) {
       printf("Window could not be initialized, error: %s\n", SDL_GetError());
       success = false;
@@ -92,8 +94,7 @@ void addSorgenteFunc(std::vector<Sorgente> &array) {
 void addCaricaFunc(std::vector<Carica> &array, int x, int y) {
   array.push_back(*new Carica(static_cast<float>(x), static_cast<float>(y),
                               caricaDiProva, massa));
-  if (abilitaLog)
-    LOGXY(x, y);
+  if (abilitaLog) LOGXY(x, y);
 }
 
 int main() {
@@ -117,8 +118,8 @@ int main() {
   std::vector<Carica> cariche;
   std::vector<CaricaLineaDiForza> lineeDiForza;
   std::vector<vector2> mouseVector;
-  Sorgente sorgentePrima = Sorgente({200, 300}, 2.5e-9);
-  Sorgente sorgenteSeconda = Sorgente({350, 300}, 5.2e-8);
+  Sorgente sorgentePrima = Sorgente({300, 500}, 2.5e-9);
+  Sorgente sorgenteSeconda = Sorgente({600, 500}, 5.2e-8);
   sorgenti.push_back(sorgentePrima);
   sorgenti.push_back(sorgenteSeconda);
   ImGui::CreateContext();
@@ -138,30 +139,39 @@ int main() {
         quit = true;
       } else if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
-        case SDLK_n:
-          addSorgenteFunc(sorgenti);
-          break;
-        case SDLK_UP:
-          lunghezza += 10;
-          break;
-        case SDLK_DOWN:
-          lunghezza -= 10;
-          break;
-        case SDLK_r:
-          sorgenti.clear();
-          break;
-        case SDLK_i:
-          open = !open;
-          break;
-        case SDLK_k:
-          grafico.puntiDelGrafico.clear();
-          break;
-        case SDLK_SPACE:
-          addCaricaFunc(cariche, x, y);
-          break;
-        case SDLK_p:
-          pause = !pause;
-          break;
+          case SDLK_n:
+            addSorgenteFunc(sorgenti);
+            break;
+          case SDLK_UP:
+            lunghezza += 10;
+            break;
+          case SDLK_DOWN:
+            lunghezza -= 10;
+            break;
+          case SDLK_r:
+            sorgenti.clear();
+            break;
+          case SDLK_i:
+            open = !open;
+            break;
+          case SDLK_k:
+            grafico.puntiDelGrafico.clear();
+            break;
+          case SDLK_SPACE:
+            addCaricaFunc(cariche, x, y);
+            break;
+          case SDLK_p:
+            pause = !pause;
+            break;
+        }
+      } else if (e.type == SDL_WINDOWEVENT) {
+        if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+          SDL_SetWindowSize(gWindow, e.window.data1, e.window.data2);
+          SCREEN_WIDTH = e.window.data1;
+          SCREEN_HEIGHT = e.window.data2;
+          setDensity(punti, densita);
+	  ImGuiSDL::Deinitialize();
+	  ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
         }
       } else if (e.type == SDL_MOUSEBUTTONDOWN) {
       } else if (e.type == SDL_MOUSEWHEEL) {
@@ -198,7 +208,8 @@ int main() {
     } else {
       ImGui::Text("Stato della simulazione: IN ESECUZIONE");
     }
-    ImGui::Text("Intensità campo elettrico nel cursore totale: %f N/C", intensitaMouse.modulo);
+    ImGui::Text("Intensità campo elettrico nel cursore totale: %f N/C",
+                intensitaMouse.modulo);
     for (unsigned int i = 0; i < sorgenti.size(); i++) {
       std::ostringstream streamObj;
       streamObj << sorgenti[i].getCharge();
@@ -235,6 +246,8 @@ int main() {
       ImGui::SliderInt("coloreBase", &coloreBase, 0, 255);
       ImGui::Text("Scala pixel (Rendering)");
       ImGui::SliderInt("scala", &scala, 1, 1000);
+      ImGui::Text("Raggio cariche di prova");
+      ImGui::SliderInt("raggioCarica", &raggioCarica, 1, 100);
       ImGui::Checkbox("Griglia", &drawGrid);
       ImGui::Checkbox("Linee di campo", &drawLineeDiCampo);
       ImGui::Checkbox("Traiettoria cariche di prova", &drawGraficoCariche);
@@ -248,7 +261,8 @@ int main() {
       ImGui::ColorEdit4("Colore grafico cariche", &coloreGrCariche[0]);
       ImGui::ColorEdit4("Colore base vettori", &coloreBaseRGB[0]);
       ImGui::ColorEdit4("Colore griglia primario", &coloreGrigliaPrimario[0]);
-      ImGui::ColorEdit4("Colore griglia secondario", &coloreGrigliaSecondario[0]);
+      ImGui::ColorEdit4("Colore griglia secondario",
+                        &coloreGrigliaSecondario[0]);
       ImGui::ColorEdit4("Colore linee di campo", &coloreLinee[0]);
     }
     ImGui::Checkbox("Log di debug", &abilitaLog);
@@ -257,8 +271,8 @@ int main() {
     ImGui::InputFloat("x", &caricaNuova.x, 0, SCREEN_WIDTH, "%e");
     ImGui::InputFloat("y", &caricaNuova.y, 0, SCREEN_HEIGHT, "%e");
     if (ImGui::Button("Aggiungi")) {
-      cariche.push_back(*new Carica(caricaNuova.x, caricaNuova.y,
-                                    caricaDiProva, massa));
+      cariche.push_back(
+          *new Carica(caricaNuova.x, caricaNuova.y, caricaDiProva, massa));
     }
     ImGui::End();
 
@@ -285,7 +299,9 @@ int main() {
         ImGui::TableSetColumnIndex(4);
         ImGui::Text("%f", cariche[i].getPosition().y);
 
-        //ImGui::Text("Carica %d: ACC\tX=%f\tY=%f\tPOS\tX=%f\tY=%f", i, cariche[i].getAcceleration().x, cariche[i].getAcceleration().y, cariche[i].getPosition().x, cariche[i].getPosition().y);
+        // ImGui::Text("Carica %d: ACC\tX=%f\tY=%f\tPOS\tX=%f\tY=%f", i,
+        // cariche[i].getAcceleration().x, cariche[i].getAcceleration().y,
+        // cariche[i].getPosition().x, cariche[i].getPosition().y);
       }
       ImGui::EndTable();
       ImGui::End();
@@ -310,7 +326,8 @@ int main() {
         }
       }
       spawnLinee(lineeDiForza, itSorgenti);
-      //lineeDiForza.push_back(CaricaLineaDiForza(it->getPosition().x + raggio, it->getPosition().y + raggio));
+      // lineeDiForza.push_back(CaricaLineaDiForza(it->getPosition().x + raggio,
+      // it->getPosition().y + raggio));
 
       // Simulazione delle cariche di prova, non definitivo
       // (da unire con l'altra funzione o creare classe base)
@@ -321,8 +338,7 @@ int main() {
           simulazioneCampo(itSorgenti, itCariche, cariche);
         }
       }
-      if (drawSorgenti)
-        itSorgenti->render(gRenderer);
+      if (drawSorgenti) itSorgenti->render(gRenderer);
     }
 
     // Simulazione movimento cariche di prova
@@ -332,8 +348,7 @@ int main() {
       for (itCariche = cariche.begin(); itCariche != cariche.end();
            itCariche++) {
         itCariche->computeForces();
-        if (!pause)
-          itCariche->updatePosition(dt);
+        if (!pause) itCariche->updatePosition(dt);
 
         grafico.puntiDelGrafico.push_back(
             Point(itCariche->getPosition().x, itCariche->getPosition().y));
@@ -371,7 +386,8 @@ int main() {
       intensitaMouse.y += vec.y;
     }
 
-    intensitaMouse.modulo = sqrt((intensitaMouse.x * intensitaMouse.x) + (intensitaMouse.y * intensitaMouse.y));
+    intensitaMouse.modulo = sqrt((intensitaMouse.x * intensitaMouse.x) +
+                                 (intensitaMouse.y * intensitaMouse.y));
     intensitaMouse.x = 0;
     intensitaMouse.y = 0;
     mouseVector.clear();

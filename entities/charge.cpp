@@ -9,7 +9,7 @@
 #define LOGXY(x, y) std::cout << "Coppia\tX: " << x << "\tY: " << y << std::endl;
 #include "../draw.h"
 #include "settings.h"
-int raggioCarica = 4;
+int raggioCarica = 8;
 Carica::Carica(float xpos, float ypos, float carica, float massa) {
   mass = massa;
   charge = carica;
