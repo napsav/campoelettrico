@@ -19,8 +19,10 @@ CaricaLineaDiForza::CaricaLineaDiForza(float xpos, float ypos) {
   posizioneIniziale.y = ypos;
   position.x = xpos;
   position.y = ypos;
+  if(abilitaLog) {
   std::cout << "COSTRUTTORE Linea di forza posizione x " << position.x
             << " e posizione y " << position.y << std::endl;
+  }
 }
 
 void CaricaLineaDiForza::addForce(vector2 vettore) {

@@ -36,8 +36,9 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti, std::vector<v
       costanteColoumb * (itSorgenti->getCharge() /
                          ((distanzaVettore.modulo * distanzaVettore.modulo) *
                           (1.0f / (scala * scala))));
-
-  std::cout << "Valore mouse: \t" << valoreForzaCampo << std::endl;
+  if (abilitaLog) {
+    std::cout << "Valore mouse: \t" << valoreForzaCampo << std::endl;
+  }
   intensita.x = valoreForzaCampo * distanzaVettore.xNormalized;
   intensita.y = valoreForzaCampo * distanzaVettore.yNormalized;
   intensita.modulo = valoreForzaCampo;
@@ -66,15 +67,16 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
         costanteColoumb * (itSorgenti->getCharge() /
                            ((distanzaVettore.modulo * distanzaVettore.modulo) *
                             (1.0f / (scala * scala))));
-
-    std::cout << "Valore: \t" << valoreForzaCampo << std::endl;
+    if(abilitaLog)
+      std::cout << "Valore: \t" << valoreForzaCampo << std::endl;
     intensita.x = valoreForzaCampo * distanzaVettore.xNormalized;
     intensita.y = valoreForzaCampo * distanzaVettore.yNormalized;
     intensita.modulo = valoreForzaCampo;
     it->addForce(intensita);
   } else {
     cariche.erase(it);
-    std::cout << "Cancellazione carica" << std::endl;
+    if(abilitaLog)
+      std::cout << "Cancellazione carica" << std::endl;
     it--;
   }
 }

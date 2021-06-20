@@ -19,3 +19,8 @@ extern float coloreBaseRGB[4];
 extern float coloreGrigliaSecondario[4];
 extern float coloreGrigliaPrimario[4];
 extern float coloreLinee[4];
+extern bool abilitaLog;
+extern bool sorgentiColoreSegno;
+extern bool darkMode;
+extern float coloreGrCariche[4];
+extern bool drawGraficoCariche;

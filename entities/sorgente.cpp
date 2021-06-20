@@ -2,12 +2,13 @@
 
 #include <SDL2/SDL.h>
 
-#include "../ui/imgui.h"
-#include "vector.h"
-#include "settings.h"
-#include "lineeDiForza.h"
 #include "../draw.h"
+#include "../ui/imgui.h"
 #include "lineeDiForza.h"
+#include "settings.h"
+#include "vector.h"
+#define COLORE(color) \
+  color[0] * 0xFF, color[1] * 0xFF, color[2] * 0xFF, color[3] * 0xFF
 
 bool isInside(float x, float y, float posx, float posy, float radius) {
   bool inside = true;
@@ -22,7 +23,6 @@ bool isInside(float x, float y, float posx, float posy, float radius) {
   }
   return inside;
 }
-
 
 Sorgente::Sorgente(vector2 pos, float coloumb) {
   posizione = pos;
@@ -42,7 +42,16 @@ void Sorgente::spawnLinee() {
 }
 
 void Sorgente::render(SDL_Renderer *renderer) {
-   DrawCircle(renderer, posizione.x ,posizione.y, raggio);
+  if (sorgentiColoreSegno) {
+    if (carica >= 0) {
+      SDL_SetRenderDrawColor(renderer, 0x00, 0xBF, 0x00, 0xFF);
+    } else {
+      SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
+    }
+  } else {
+    SDL_SetRenderDrawColor(renderer, COLORE(coloreSorgente));
+  }
+  DrawCircle(renderer, posizione.x, posizione.y, raggio);
 }
 
 void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
@@ -53,9 +62,9 @@ void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
         selected = true;
       }
     } else if (e.button.button == SDL_BUTTON_RIGHT) {
-	    this->spawnLinee();
+      this->spawnLinee();
       if (isInside(x, y, posizione.x, posizione.y, raggio)) {
-        if(windowOpen) {
+        if (windowOpen) {
           windowOpen = false;
         } else {
           windowOpen = true;
@@ -72,16 +81,16 @@ void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {
     }
   } else if (e.type == SDL_KEYDOWN) {
     switch (e.key.keysym.sym) {
-      case SDLK_z:
-        if (isInside(x, y, posizione.x, posizione.y, 10)) {
-          carica -= 0.1e-9;
-          break;
-        }
-      case SDLK_x:
-        if (isInside(x, y, posizione.x, posizione.y, 10)) {
-          carica += 0.1e-9;
-          break;
-        }
+    case SDLK_z:
+      if (isInside(x, y, posizione.x, posizione.y, 10)) {
+        carica -= 0.1e-9;
+        break;
+      }
+    case SDLK_x:
+      if (isInside(x, y, posizione.x, posizione.y, 10)) {
+        carica += 0.1e-9;
+        break;
+      }
     }
   }
 }
