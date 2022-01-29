@@ -19,9 +19,9 @@ CaricaLineaDiForza::CaricaLineaDiForza(float xpos, float ypos) {
   posizioneIniziale.y = ypos;
   position.x = xpos;
   position.y = ypos;
-  if(abilitaLog) {
-  std::cout << "COSTRUTTORE Linea di forza posizione x " << position.x
-            << " e posizione y " << position.y << std::endl;
+  if (abilitaLog) {
+    std::cout << "COSTRUTTORE Linea di forza posizione x " << position.x
+              << " e posizione y " << position.y << std::endl;
   }
 }
 
@@ -40,10 +40,14 @@ void CaricaLineaDiForza::computeVectors(std::vector<Sorgente> &Sorgenti) {
       vector2 intensita;
       float valoreForzaCampo;
       vector2 distanzaVettore = distanza(sorgente.getPosition(), position);
-      valoreForzaCampo =
-          costanteColoumb * (sorgente.getCharge() /
-                             ((distanzaVettore.modulo * distanzaVettore.modulo) *
-                              (1.0f / (scala * scala))));
+      if (distanzaVettore.modulo != 0) {
+        valoreForzaCampo =
+            costanteColoumb * (sorgente.getCharge() /
+                               ((distanzaVettore.modulo * distanzaVettore.modulo) *
+                                (1.0f / (scala * scala))));
+      } else {
+        valoreForzaCampo = 0;
+      }
 
       intensita.x = valoreForzaCampo * distanzaVettore.xNormalized;
       intensita.y = valoreForzaCampo * distanzaVettore.yNormalized;

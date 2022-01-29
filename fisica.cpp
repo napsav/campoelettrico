@@ -32,10 +32,15 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti, std::vector<v
 
   // Se la carica di prova si trova entro un certo raggio della sorgente, o se si trova fuori dallo schermo, viene eliminata per risparmiare risorse
 
-  valoreForzaCampo =
-      costanteColoumb * (itSorgenti->getCharge() /
-                         ((distanzaVettore.modulo * distanzaVettore.modulo) *
-                          (1.0f / (scala * scala))));
+  if (distanzaVettore.modulo != 0) {
+    valoreForzaCampo =
+        costanteColoumb * (itSorgenti->getCharge() /
+                           ((distanzaVettore.modulo * distanzaVettore.modulo) *
+                            (1.0f / (scala * scala))));
+  } else {
+    valoreForzaCampo = 0;
+  }
+
   if (abilitaLog) {
     std::cout << "Valore mouse: \t" << valoreForzaCampo << std::endl;
   }
@@ -67,7 +72,7 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
         costanteColoumb * (itSorgenti->getCharge() /
                            ((distanzaVettore.modulo * distanzaVettore.modulo) *
                             (1.0f / (scala * scala))));
-    if(abilitaLog)
+    if (abilitaLog)
       std::cout << "Valore: \t" << valoreForzaCampo << std::endl;
     intensita.x = valoreForzaCampo * distanzaVettore.xNormalized;
     intensita.y = valoreForzaCampo * distanzaVettore.yNormalized;
@@ -75,7 +80,7 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
     it->addForce(intensita);
   } else {
     cariche.erase(it);
-    if(abilitaLog)
+    if (abilitaLog)
       std::cout << "Cancellazione carica" << std::endl;
     it--;
   }
@@ -86,10 +91,13 @@ void simulazioneCampo(std::vector<Sorgente>::iterator &itSorgenti,
   float valoreCampo;
   vector2 distanzaVettore =
       distanza(itSorgenti->getPosition(), it->getPosition());
-
-  valoreCampo =
-      costanteColoumb * (itSorgenti->getCharge() /
-                         (distanzaVettore.modulo * distanzaVettore.modulo));
+  if (distanzaVettore.modulo != 0) {
+    valoreCampo =
+        costanteColoumb * (itSorgenti->getCharge() /
+                           (distanzaVettore.modulo * distanzaVettore.modulo));
+  } else {
+    valoreCampo = 0;
+  }
 
   intensita.x = valoreCampo * distanzaVettore.xNormalized * (1.0f / scala);
   intensita.y = valoreCampo * distanzaVettore.yNormalized * (1.0f / scala);

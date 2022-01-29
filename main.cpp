@@ -94,7 +94,8 @@ void addSorgenteFunc(std::vector<Sorgente> &array) {
 void addCaricaFunc(std::vector<Carica> &array, int x, int y) {
   array.push_back(*new Carica(static_cast<float>(x), static_cast<float>(y),
                               caricaDiProva, massa));
-  if (abilitaLog) LOGXY(x, y);
+  if (abilitaLog)
+    LOGXY(x, y);
 }
 
 int main() {
@@ -139,30 +140,30 @@ int main() {
         quit = true;
       } else if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
-          case SDLK_n:
-            addSorgenteFunc(sorgenti);
-            break;
-          case SDLK_UP:
-            lunghezza += 10;
-            break;
-          case SDLK_DOWN:
-            lunghezza -= 10;
-            break;
-          case SDLK_r:
-            sorgenti.clear();
-            break;
-          case SDLK_i:
-            open = !open;
-            break;
-          case SDLK_k:
-            grafico.puntiDelGrafico.clear();
-            break;
-          case SDLK_SPACE:
-            addCaricaFunc(cariche, x, y);
-            break;
-          case SDLK_p:
-            pause = !pause;
-            break;
+        case SDLK_n:
+          addSorgenteFunc(sorgenti);
+          break;
+        case SDLK_UP:
+          lunghezza += 10;
+          break;
+        case SDLK_DOWN:
+          lunghezza -= 10;
+          break;
+        case SDLK_r:
+          sorgenti.clear();
+          break;
+        case SDLK_i:
+          open = !open;
+          break;
+        case SDLK_k:
+          grafico.puntiDelGrafico.clear();
+          break;
+        case SDLK_SPACE:
+          addCaricaFunc(cariche, x, y);
+          break;
+        case SDLK_p:
+          pause = !pause;
+          break;
         }
       } else if (e.type == SDL_WINDOWEVENT) {
         if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
@@ -170,8 +171,8 @@ int main() {
           SCREEN_WIDTH = e.window.data1;
           SCREEN_HEIGHT = e.window.data2;
           setDensity(punti, densita);
-	  ImGuiSDL::Deinitialize();
-	  ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+          ImGuiSDL::Deinitialize();
+          ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
         }
       } else if (e.type == SDL_MOUSEBUTTONDOWN) {
       } else if (e.type == SDL_MOUSEWHEEL) {
@@ -338,7 +339,8 @@ int main() {
           simulazioneCampo(itSorgenti, itCariche, cariche);
         }
       }
-      if (drawSorgenti) itSorgenti->render(gRenderer);
+      if (drawSorgenti)
+        itSorgenti->render(gRenderer);
     }
 
     // Simulazione movimento cariche di prova
@@ -348,7 +350,8 @@ int main() {
       for (itCariche = cariche.begin(); itCariche != cariche.end();
            itCariche++) {
         itCariche->computeForces();
-        if (!pause) itCariche->updatePosition(dt);
+        if (!pause)
+          itCariche->updatePosition(dt);
 
         grafico.puntiDelGrafico.push_back(
             Point(itCariche->getPosition().x, itCariche->getPosition().y));

@@ -7,8 +7,14 @@ vector2 normalize(vector2 daNormalizzare) {
   float modulo = sqrt((x * x) + (y * y));
   normalizzato.x = daNormalizzare.x;
   normalizzato.y = daNormalizzare.y;
-  normalizzato.xNormalized = x / modulo;
-  normalizzato.yNormalized = y / modulo;
+  if (modulo != 0) {
+    normalizzato.xNormalized = x / modulo;
+    normalizzato.yNormalized = y / modulo;
+  } else {
+    normalizzato.xNormalized = 0;
+    normalizzato.yNormalized = 0;
+  }
+
   normalizzato.modulo = modulo;
   return normalizzato;
 }

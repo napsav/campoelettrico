@@ -37,7 +37,7 @@ void DrawCircle(SDL_Renderer *renderer, int32_t centreX, int32_t centreY, int32_
   }
 }
 
-void RenderGriglia(SDL_Renderer *renderer, int SCREEN_WIDTH, int SCREEN_HEIGHT, int scala) {
+void RenderGriglia(SDL_Renderer *renderer, unsigned int SCREEN_WIDTH, unsigned int SCREEN_HEIGHT, int scala) {
   for (unsigned int i = 0; i < SCREEN_WIDTH; i = i + scala) {
     if (scala > 20) {
       SDL_SetRenderDrawColor(renderer, COLORE(coloreGrigliaSecondario));
