@@ -22,6 +22,7 @@
 #include "entities/vector.h"
 #include "fisica.h"
 #include "graph.h"
+#include "ui/font.h"
 #include "ui/imgui.h"
 #include "ui/imgui_impl_sdl.h"
 #include "ui/imgui_impl_sdlrenderer.h"
@@ -148,6 +149,7 @@ int main() {
   (void)io;
   // vecchio sdl: ImGui_ImplSDL2_InitTest(gWindow);
   io.WantCaptureKeyboard = true;
+  io.Fonts->AddFontFromMemoryCompressedTTF(robotoFont_compressed_data, robotoFont_compressed_size, 16);
 
   ImGui_ImplSDL2_InitForSDLRenderer(gWindow);
   ImGui_ImplSDLRenderer_Init(gRenderer);
@@ -236,17 +238,16 @@ int main() {
 
     ImGui::Begin("Impostazioni", &open);
     if (pause) {
-      ImGui::Text("Stato della simulazione: IN PAUSA");
+      ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Stato della simulazione: IN PAUSA");
     } else {
-      ImGui::Text("Stato della simulazione: IN ESECUZIONE");
+      ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Stato della simulazione: IN ESECUZIONE");
     }
+    ImGui::Separator();
     ImGui::Text("Intensità campo elettrico nel cursore totale: %f N/C",
                 intensitaMouse.modulo);
-    for (unsigned int i = 0; i < sorgenti.size(); i++) {
-      std::ostringstream streamObj;
-      streamObj << sorgenti[i].getCharge();
-      ImGui::Text("Sorgente %d: %s C", i, streamObj.str().c_str());
-    }
+    ImGui::Separator();
+
+    ImGui::Checkbox("Log di debug", &abilitaLog);
 
     if (ImGui::CollapsingHeader("Opzioni principali",
                                 ImGuiTreeNodeFlags_None)) {
@@ -286,6 +287,8 @@ int main() {
       ImGui::Checkbox("Campo vettoriale", &drawCampoVettoriale);
       ImGui::Checkbox("Sorgenti visibili", &drawSorgenti);
       ImGui::Checkbox("Sorgenti colorate", &sorgentiColoreSegno);
+      ImGui::Checkbox("Modalità scura", &darkMode);
+      ImGui::Separator();
       ImGui::ColorEdit4("Colore sfondo", &coloreSfondo[0]);
       ImGui::ColorEdit4("Colore cariche", &coloreCarica[0]);
       if (!sorgentiColoreSegno)
@@ -297,8 +300,8 @@ int main() {
                         &coloreGrigliaSecondario[0]);
       ImGui::ColorEdit4("Colore linee di campo", &coloreLinee[0]);
     }
-    ImGui::Checkbox("Log di debug", &abilitaLog);
-    ImGui::Checkbox("Modalità scura", &darkMode);
+
+    ImGui::Separator();
     ImGui::Text("Aggiungi carica in una posizione precisa");
     ImGui::InputFloat("x", &caricaNuova.x, 0, SCREEN_WIDTH, "%e");
     ImGui::InputFloat("y", &caricaNuova.y, 0, SCREEN_HEIGHT, "%e");
@@ -306,6 +309,33 @@ int main() {
       cariche.push_back(
           *new Carica(caricaNuova.x, caricaNuova.y, caricaDiProva, massa));
     }
+    ImGui::End();
+    // TODO: resolve crash when collapsing source charges window
+    // TODO: better handle placing of windows
+    ImGui::Begin("Sorgenti");
+    ImGui::BeginTable("sorgenti", 4, ImGuiTableFlags_Borders);
+    ImGui::TableSetupColumn("N");
+    ImGui::TableSetupColumn("Coloumb");
+    ImGui::TableSetupColumn("X");
+    ImGui::TableSetupColumn("Y");
+    ImGui::TableHeadersRow();
+    for (unsigned int i = 0; i < sorgenti.size(); i++) {
+
+      std::ostringstream streamObj;
+      streamObj << sorgenti[i].getCharge();
+      // ImGui::Text("Sorgente %d: %s C", i, streamObj.str().c_str());
+
+      ImGui::TableNextRow();
+      ImGui::TableSetColumnIndex(0);
+      ImGui::Text("%d", i);
+      ImGui::TableSetColumnIndex(1);
+      ImGui::Text("%s", streamObj.str().c_str());
+      ImGui::TableSetColumnIndex(2);
+      ImGui::Text("%f", sorgenti[i].getPosition().x);
+      ImGui::TableSetColumnIndex(3);
+      ImGui::Text("%f", sorgenti[i].getPosition().y);
+    }
+    ImGui::EndTable();
     ImGui::End();
 
     if (cariche.size() > 0) {
@@ -443,6 +473,7 @@ int main() {
     }
 
     // Rendering ImGUI
+    ImGui::ShowDemoWindow();
 
     ImGui::Render();
 
