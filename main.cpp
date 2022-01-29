@@ -23,7 +23,11 @@
 #include "fisica.h"
 #include "graph.h"
 #include "ui/imgui.h"
-#include "ui/imgui_sdl.h"
+#include "ui/imgui_impl_sdl.h"
+#include "ui/imgui_impl_sdlrenderer.h"
+#if !SDL_VERSION_ATLEAST(2, 0, 17)
+#error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
+#endif
 float costanteColoumb = 8.987551792314e9;
 unsigned int SCREEN_HEIGHT = 720;
 unsigned int SCREEN_WIDTH = 1280;
@@ -44,6 +48,7 @@ bool drawGraficoCariche = true;
 bool darkMode = true;
 bool abilitaLog = false;
 float caricaDiProva = 1.602176634e-19;
+
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
@@ -53,10 +58,12 @@ bool init() {
     printf("SDL could not be initialized, error: %s\n", SDL_GetError());
     success = false;
   } else {
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+
     gWindow =
         SDL_CreateWindow("Campo Elettrostatico", SDL_WINDOWPOS_UNDEFINED,
                          SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
-                         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+                         window_flags);
     if (gWindow == NULL) {
       printf("Window could not be initialized, error: %s\n", SDL_GetError());
       success = false;
@@ -68,6 +75,10 @@ bool init() {
             "%s\n",
             SDL_GetError());
       } else {
+        SDL_RendererInfo info;
+        SDL_GetRendererInfo(gRenderer, &info);
+        SDL_Log("Current SDL_Renderer: %s", info.name);
+
         SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
       }
@@ -123,14 +134,24 @@ int main() {
   Sorgente sorgenteSeconda = Sorgente({600, 500}, 5.2e-8);
   sorgenti.push_back(sorgentePrima);
   sorgenti.push_back(sorgenteSeconda);
+
   ImGui::CreateContext();
-  ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+  /**
+   * imgui_sdl (vecchio)
+   * ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+   */
+
   // carica caricaDiProva = {{600, 300}, {}};
   setDensity(punti, densita);
   ImGuiIO &io = ImGui::GetIO();
   (void)io;
-  ImGui_ImplSDL2_InitTest(gWindow);
+  // vecchio sdl: ImGui_ImplSDL2_InitTest(gWindow);
   io.WantCaptureKeyboard = true;
+
+  ImGui_ImplSDL2_InitForSDLRenderer(gWindow);
+  ImGui_ImplSDLRenderer_Init(gRenderer);
+
   while (!quit) {
     int wheel = 0;
     SDL_GetMouseState(&x, &y);
@@ -166,13 +187,17 @@ int main() {
           break;
         }
       } else if (e.type == SDL_WINDOWEVENT) {
+        if (e.window.event == SDL_WINDOWEVENT_CLOSE && e.window.windowID == SDL_GetWindowID(gWindow))
+          quit = true;
         if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
           SDL_SetWindowSize(gWindow, e.window.data1, e.window.data2);
           SCREEN_WIDTH = e.window.data1;
           SCREEN_HEIGHT = e.window.data2;
           setDensity(punti, densita);
-          ImGuiSDL::Deinitialize();
-          ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+          // TODO: resizing window fix for imgui
+          // ImGuiSDL::Deinitialize();
+          // ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
         }
       } else if (e.type == SDL_MOUSEBUTTONDOWN) {
       } else if (e.type == SDL_MOUSEWHEEL) {
@@ -183,6 +208,13 @@ int main() {
         itSorgenti->handleEnvent(e, x, y);
       }
     }
+
+    // Finestra impostazioni
+
+    // --------------------
+    // 	IMGUI
+    // --------------------
+
     // ImGUI input handling
 
     const int buttons = SDL_GetMouseState(&x, &y);
@@ -192,17 +224,16 @@ int main() {
     io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
     io.MouseWheel = static_cast<float>(wheel);
 
-    // Finestra impostazioni
+    ImGui_ImplSDLRenderer_NewFrame();
+    ImGui_ImplSDL2_NewFrame(gWindow);
+    ImGui::NewFrame();
 
-    // --------------------
-    // 	IMGUI
-    // --------------------
     if (darkMode) {
       ImGui::StyleColorsDark();
     } else {
       ImGui::StyleColorsLight();
     }
-    ImGui::NewFrame();
+
     ImGui::Begin("Impostazioni", &open);
     if (pause) {
       ImGui::Text("Stato della simulazione: IN PAUSA");
@@ -414,16 +445,18 @@ int main() {
     // Rendering ImGUI
 
     ImGui::Render();
-    ImGuiSDL::Render(ImGui::GetDrawData());
+
+    ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
     SDL_RenderPresent(gRenderer);
   }
 
-  ImGuiSDL::Deinitialize();
+  ImGui_ImplSDLRenderer_Shutdown();
+  ImGui_ImplSDL2_Shutdown();
+  ImGui::DestroyContext();
 
   SDL_DestroyRenderer(gRenderer);
   SDL_DestroyWindow(gWindow);
 
-  ImGui::DestroyContext();
   SDL_Quit();
   return 0;
 }

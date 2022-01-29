@@ -14,13 +14,12 @@ entities/campoVettoriale.cpp
 entities/vector.cpp
 entities/charge.cpp
 entities/lineeDiForza.cpp
-ui/imgui_sdl.cpp
 ui/imgui.cpp
 ui/imgui_demo.cpp
 ui/imgui_draw.cpp
-ui/imgui_sdl.cpp
 ui/imgui_tables.cpp
 ui/imgui_widgets.cpp
+ui/imgui_impl_sdlrenderer.cpp
 ui/imgui_impl_sdl.cpp
 graph.cpp
 fisica.cpp
