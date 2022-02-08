@@ -1,13 +1,13 @@
 
 #include "lineeDiForza.h"
-#include "settings.h"
+#include "../settings.h"
 #define PI 3.141592
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <math.h>
 #include <vector>
 
-#define LOGVECTOR(stringa, vec) std::cout << stringa << "\tX: " << vec.x << "\tY: " << vec.y << std::endl;
+
 
 float salto = 1;
 int maxStep = 1000;
@@ -95,7 +95,7 @@ void spawnLinee(std::vector<CaricaLineaDiForza> &linee, std::vector<Sorgente>::i
     if (carica > 0) {
       linee.push_back(CaricaLineaDiForza(x + (raggio * cos(angoloCorrente)), y + (raggio * sin(angoloCorrente))));
     } else {
-      linee.push_back(CaricaLineaDiForza((x + ((raggio + (maxStep / 2)) * cos(angoloCorrente))), (y + ((raggio + (maxStep / 2)) * sin(angoloCorrente)))));
+      linee.push_back(CaricaLineaDiForza((x + ((raggio + (maxStep / 2.0f)) * cos(angoloCorrente))), (y + ((raggio + (maxStep / 2.0f)) * sin(angoloCorrente)))));
     }
   }
 }

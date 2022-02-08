@@ -6,7 +6,7 @@
 
 #include "../draw.h"
 #include "../graph.h"
-#include "settings.h"
+#include "../settings.h"
 #include "sorgente.h"
 #include "vector.h"
 #include <vector>

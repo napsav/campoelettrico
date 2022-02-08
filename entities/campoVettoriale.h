@@ -1,8 +1,18 @@
 #pragma once
-#include "settings.h"
+#include "../settings.h"
 #include "vector.h"
 #include <SDL2/SDL.h>
 #include <vector>
+
+
+#include <cmath>
+#include <iostream>
+#include <vector>
+#define COLORE(color) \
+  color[0] * 0xFF, color[1] * 0xFF, color[2] * 0xFF, color[3] * 0xFF
+#include "../settings.h"
+#include "sorgente.h"
+
 class PuntoDelCampo {
 public:
   PuntoDelCampo(float xpos, float ypos);

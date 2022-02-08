@@ -14,6 +14,7 @@ entities/campoVettoriale.cpp
 entities/vector.cpp
 entities/charge.cpp
 entities/lineeDiForza.cpp
+ui/ui.cpp
 ui/imgui.cpp
 ui/imgui_demo.cpp
 ui/imgui_draw.cpp
@@ -23,6 +24,7 @@ ui/imgui_impl_sdlrenderer.cpp
 ui/imgui_impl_sdl.cpp
 graph.cpp
 fisica.cpp
+utils.cpp
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -1,4 +1,5 @@
 #pragma once
+#include "entities/vector.h"
 extern int lunghezza;
 extern int raggio;
 extern float maxCarica;
@@ -24,3 +25,12 @@ extern bool sorgentiColoreSegno;
 extern bool darkMode;
 extern float coloreGrCariche[4];
 extern bool drawGraficoCariche;
+extern int densita;
+extern bool drawCampoVettoriale;
+extern bool drawSorgenti;
+extern bool drawGrid;
+extern bool drawLineeDiCampo;
+extern float caricaDiProva;
+extern vector2 caricaNuova;
+extern vector2 sorgenteNuova;
+extern float caricaSorgenteNuova;

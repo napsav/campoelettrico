@@ -1,6 +1,9 @@
 #pragma once
+
+#include "../draw.h"
+#include "../ui/imgui.h"
+#include "../settings.h"
 #include "vector.h"
-#include <SDL2/SDL.h>
 
 class Sorgente {
 public:

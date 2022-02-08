@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "entities/settings.h"
+#include "settings.h"
 
 bool outOfBounds(std::vector<Carica>::iterator it) {
   bool outside = false;

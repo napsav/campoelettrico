@@ -1,10 +1,13 @@
 #pragma once
-#include <SDL2/SDL.h>
-
+#include <iostream>
 #include <vector>
-
+#include <SDL2/SDL.h>
+#include "../settings.h"
+#include "../draw.h"
+#include "sorgente.h"
 #include "vector.h"
-#include "settings.h"
+#include "../macros.h"
+
 
 class Carica {
  public:

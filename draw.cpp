@@ -1,5 +1,5 @@
 #include "draw.h"
-#include "entities/settings.h"
+#include "settings.h"
 #include <SDL2/SDL.h>
 #define COLORE(color) \
   color[0] * 0xFF, color[1] * 0xFF, color[2] * 0xFF, color[3] * 0xFF

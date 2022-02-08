@@ -1,12 +1,6 @@
 #include "sorgente.h"
 
-#include <SDL2/SDL.h>
 
-#include "../draw.h"
-#include "../ui/imgui.h"
-#include "lineeDiForza.h"
-#include "settings.h"
-#include "vector.h"
 #define COLORE(color) \
   color[0] * 0xFF, color[1] * 0xFF, color[2] * 0xFF, color[3] * 0xFF
 
