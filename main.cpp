@@ -36,6 +36,9 @@ bool init() {
     printf("SDL could not be initialized, error: %s\n", SDL_GetError());
     success = false;
   } else {
+
+    // THIS MAKES SURE COMPOSITOR IS NOT DISABLED AUTOMATICALLY ON LINUX
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
     gWindow =
@@ -65,7 +68,7 @@ bool init() {
   return success;
 }
 
-int main() {
+int main(int argc,  char** argv) {
   if (!init()) {
     std::cout << "Init di SDL fallito" << std::endl;
     return 1;

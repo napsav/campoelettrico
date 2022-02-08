@@ -14,8 +14,12 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
   ImGui::Begin("Impostazioni");
   if (pause) {
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Stato della simulazione: IN PAUSA");
+    if(ImGui::Button("Avvia"))
+        pause = !pause;
   } else {
     ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Stato della simulazione: IN ESECUZIONE");
+    if(ImGui::Button("Metti in pausa"))
+        pause = !pause;
   }
   ImGui::Separator();
   ImGui::Text("Intensità campo elettrico nel cursore totale: %f N/C",
@@ -87,6 +91,15 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
   // TODO: resolve crash when collapsing source charges window
   // TODO: better handle placing of windows
   ImGui::Begin("Sorgenti");
+
+  ImGui::Text("Aggiungi sorgente in una posizione precisa");
+  ImGui::InputFloat("x", &sorgenteNuova.x, 0, SCREEN_WIDTH, "%f");
+  ImGui::InputFloat("y", &sorgenteNuova.y, 0, SCREEN_HEIGHT, "%f");
+  ImGui::InputFloat("caricaSorgenteNuova", &caricaSorgenteNuova, -1e-20f, +1e-20f, "%e");
+  if (ImGui::Button("Aggiungi")) {
+    addSorgenteFunc(sorgenti, sorgenteNuova.x, sorgenteNuova.y);
+  }
+  ImGui::Separator();
   ImGui::BeginTable("sorgenti", 4, ImGuiTableFlags_Borders);
   ImGui::TableSetupColumn("N");
   ImGui::TableSetupColumn("Coloumb");
@@ -110,14 +123,7 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
     ImGui::Text("%f", sorgenti[i].getPosition().y);
   }
   ImGui::EndTable();
-  ImGui::Separator();
-  ImGui::Text("Aggiungi sorgente in una posizione precisa");
-  ImGui::InputFloat("x", &sorgenteNuova.x, 0, SCREEN_WIDTH, "%f");
-  ImGui::InputFloat("y", &sorgenteNuova.y, 0, SCREEN_HEIGHT, "%f");
-  ImGui::InputFloat("caricaSorgenteNuova", &caricaSorgenteNuova, -1e-20f, +1e-20f, "%e");
-  if (ImGui::Button("Aggiungi")) {
-    addSorgenteFunc(sorgenti, sorgenteNuova.x, sorgenteNuova.y);
-  }
+
   ImGui::End();
 
   if (cariche.size() > 0) {
@@ -152,7 +158,7 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
   }
 
     // Rendering ImGUI
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
 
     ImGui::Render();
 
