@@ -21,6 +21,9 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
     if(ImGui::Button("Metti in pausa"))
         pause = !pause;
   }
+  if(ImGui::Button("Rimuovi traiettorie delle cariche")) {
+	punti.clear();
+  }
   ImGui::Separator();
   ImGui::Text("Intensità campo elettrico nel cursore totale: %f N/C",
               intensitaMouse.modulo);
@@ -123,6 +126,10 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
     ImGui::Text("%f", sorgenti[i].getPosition().y);
   }
   ImGui::EndTable();
+  ImGui::Separator();
+  if(ImGui::Button("Elimina sorgenti")) {
+	clearSorgenti(sorgenti);
+  }
 
   ImGui::End();
 
@@ -154,6 +161,11 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
       // cariche[i].getPosition().x, cariche[i].getPosition().y);
     }
     ImGui::EndTable();
+	ImGui::Separator();
+	if(ImGui::Button("Elimina cariche")) {
+		clearCariche(cariche);
+	}
+
     ImGui::End();
   }
 

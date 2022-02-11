@@ -11,3 +11,7 @@ void setDensity(std::vector<PuntoDelCampo> &punti, float densita);
 void addSorgenteFunc(std::vector<Sorgente> &array, float x, float y);
 
 void addCaricaFunc(std::vector<Carica> &array, float x, float y);
+
+void clearSorgenti(std::vector<Sorgente> &array);
+
+void clearCariche(std::vector<Carica> &array);

@@ -23,3 +23,16 @@ void addCaricaFunc(std::vector<Carica> &array, float x, float y) {
   if (abilitaLog)
     LOGXY(x, y);
 }
+
+void clearSorgenti(std::vector<Sorgente> &array) {
+  array.clear();
+  if (abilitaLog)
+    std::cout << "Sorgenti rimosse\n";
+}
+
+void clearCariche(std::vector<Carica> &array) {
+	array.clear();
+	if(abilitaLog)
+		std::cout << "Cariche di prova rimosse!\n";
+}
+
