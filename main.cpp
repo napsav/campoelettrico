@@ -7,25 +7,22 @@
 
 #include "ui/imgui_impl_sdl.h"
 
-
 #include "./draw.h"
 #include "./timer.h"
 #include "entities/campoVettoriale.h"
 #include "entities/charge.h"
 #include "entities/lineeDiForza.h"
-#include "settings.h"
 #include "entities/sorgente.h"
 #include "entities/vector.h"
 #include "fisica.h"
 #include "graph.h"
+#include "macros.h"
+#include "settings.h"
 #include "ui/ui.h"
 #include "utils.h"
-#include "macros.h"
 #if !SDL_VERSION_ATLEAST(2, 0, 17)
 #error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
 #endif
-
-
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -68,7 +65,7 @@ bool init() {
   return success;
 }
 
-int main(int argc,  char** argv) {
+int main(int argc, char **argv) {
   if (!init()) {
     std::cout << "Init di SDL fallito" << std::endl;
     return 1;
@@ -107,8 +104,13 @@ int main(int argc,  char** argv) {
   // vecchio sdl: ImGui_ImplSDL2_InitTest(gWindow);
   io.WantCaptureKeyboard = true;
   io.Fonts->AddFontFromMemoryCompressedTTF(robotoFont_compressed_data, robotoFont_compressed_size, 16);
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-  ImGui_ImplSDL2_InitForSDLRenderer(gWindow);
+  /** NOT YET SUPPORTED TODO: update when available
+   * io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+   */
+
+  ImGui_ImplSDL2_InitForSDLRenderer(gWindow, gRenderer);
   ImGui_ImplSDLRenderer_Init(gRenderer);
 
   while (!quit) {
@@ -180,12 +182,9 @@ int main(int argc,  char** argv) {
     io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
     io.MouseWheel = static_cast<float>(wheel);
 
-
-
     SDL_SetRenderDrawColor(gRenderer, COLORE(coloreSfondo));
     SDL_RenderClear(gRenderer);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
 
     unsigned int sizeCariche = cariche.size();
 
@@ -292,6 +291,12 @@ int main(int argc,  char** argv) {
     // Rendering IMGUI
     renderUi(pause, gWindow, darkMode, intensitaMouse, punti, cariche, sorgenti);
 
+    /* NOT YET SUPPORTED TODO: update when available
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+      ImGui::UpdatePlatformWindows();
+      ImGui::RenderPlatformWindowsDefault();
+    }
+    */
     SDL_RenderPresent(gRenderer);
   }
 

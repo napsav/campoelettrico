@@ -170,7 +170,7 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
   }
 
     // Rendering ImGUI
-    //ImGui::ShowDemoWindow();
+    ImGui::ShowDemoWindow();
 
     ImGui::Render();
 
