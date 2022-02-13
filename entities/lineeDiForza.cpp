@@ -9,7 +9,7 @@
 
 
 
-float salto = 1;
+float salto = 2;
 int maxStep = 1000;
 
 CaricaLineaDiForza::CaricaLineaDiForza(float xpos, float ypos) {
