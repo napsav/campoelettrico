@@ -275,7 +275,7 @@ int main(int argc, char **argv) {
     // RENDERING GRAFICO
 
     SDL_SetRenderDrawColor(gRenderer, COLORE(coloreGrCariche));
-    grafico.render(gRenderer);
+    grafico.renderByPoints(gRenderer);
 
     // LINEE DI CAMPO
     if (drawLineeDiCampo) {
@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
     }
 
     // Rendering IMGUI
-    renderUi(pause, gWindow, darkMode, intensitaMouse, punti, cariche, sorgenti);
+    renderUi(pause, gWindow, darkMode, intensitaMouse, punti, cariche, sorgenti, grafico);
 
     /* NOT YET SUPPORTED TODO: update when available
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {

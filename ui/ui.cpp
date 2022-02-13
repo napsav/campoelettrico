@@ -1,6 +1,11 @@
 #include "ui.h"
 
-void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensitaMouse, std::vector<PuntoDelCampo> &punti, std::vector<Carica> &cariche, std::vector<Sorgente> &sorgenti) {
+bool initial_layout_done;
+ImGuiID main_dock;
+ImGuiID sidebar_dock;
+ImGuiID sidebarBottom;
+
+void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensitaMouse, std::vector<PuntoDelCampo> &punti, std::vector<Carica> &cariche, std::vector<Sorgente> &sorgenti, Graph &graficoCariche) {
   ImGui_ImplSDLRenderer_NewFrame();
   ImGui_ImplSDL2_NewFrame(gWindow);
   ImGui::NewFrame();
@@ -11,21 +16,50 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
     ImGui::StyleColorsLight();
   }
 
+  ImGuiViewport *viewport = ImGui::GetMainViewport();
+  ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(viewport, ImGuiDockNodeFlags_PassthruCentralNode);
+
+  if (!initial_layout_done) {
+    initial_layout_done = true;
+
+    // Try to find the nodes if there is a loaded state
+    ImGuiDockNode *root_node = ImGui::DockBuilderGetNode(dockspace_id);
+    // Do we have a tree?
+    if (root_node && root_node->ChildNodes[0] && root_node->ChildNodes[0]->ChildNodes[0] && root_node->ChildNodes[0]->ChildNodes[1]) {
+      sidebarBottom = root_node->ChildNodes[0]->ChildNodes[1]->ID;
+      sidebar_dock = root_node->ChildNodes[0]->ID;
+    } else {
+      ImGui::DockBuilderRemoveNode(dockspace_id);
+      ImGuiID dock_id_main = ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+      ImGui::DockBuilderSetNodeSize(dock_id_main, viewport->GetWorkCenter());
+      // ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_id_main, ImGuiDir_Down, 0.20f, NULL, &dock_id_main);
+      // ImGui::DockBuilderSetNodeSize(dock_id_bottom, ImVec2{viewport->GetWorkCenter().x, 100});
+      ImGuiID dock_id_sidebar = ImGui::DockBuilderSplitNode(dock_id_main, ImGuiDir_Right, 0.70f, NULL, &dock_id_main);
+      ImGuiID dock_id_sidebarBottom = ImGui::DockBuilderSplitNode(dock_id_sidebar, ImGuiDir_Down, 0.70f, NULL, &dock_id_sidebar);
+      // bottom_dock = dock_id_bottom;
+      sidebar_dock = dock_id_sidebar;
+      main_dock = dock_id_main;
+      sidebarBottom = dock_id_sidebarBottom;
+      ImGui::DockBuilderFinish(dockspace_id);
+    }
+  }
+
+  ImGui::SetNextWindowDockID(sidebar_dock, ImGuiCond_FirstUseEver);
   ImGui::Begin("Impostazioni");
   if (pause) {
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Stato della simulazione: IN PAUSA");
-    if(ImGui::Button("Avvia"))
-        pause = !pause;
+    if (ImGui::Button("Avvia"))
+      pause = !pause;
   } else {
     ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Stato della simulazione: IN ESECUZIONE");
-    if(ImGui::Button("Metti in pausa"))
-        pause = !pause;
+    if (ImGui::Button("Metti in pausa"))
+      pause = !pause;
   }
-  if(ImGui::Button("Rimuovi traiettorie delle cariche")) {
-	punti.clear();
+  if (ImGui::Button("Rimuovi traiettorie delle cariche")) {
+    graficoCariche.puntiDelGrafico.clear();
   }
   ImGui::Separator();
-  ImGui::Text("Intensità campo elettrico nel cursore totale: %f N/C",
+  ImGui::TextWrapped("Intensità campo elettrico nel cursore totale: %f N/C",
               intensitaMouse.modulo);
   ImGui::Separator();
 
@@ -82,61 +116,20 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
                       &coloreGrigliaSecondario[0]);
     ImGui::ColorEdit4("Colore linee di campo", &coloreLinee[0]);
   }
-
-  ImGui::Separator();
-  ImGui::Text("Aggiungi carica in una posizione precisa");
-  ImGui::InputFloat("x", &caricaNuova.x, 0, SCREEN_WIDTH, "%f");
-  ImGui::InputFloat("y", &caricaNuova.y, 0, SCREEN_HEIGHT, "%f");
-  if (ImGui::Button("Aggiungi")) {
-    addCaricaFunc(cariche, caricaNuova.x, caricaNuova.y);
-  }
-  ImGui::End();
-  // TODO: resolve crash when collapsing source charges window
-  // TODO: better handle placing of windows
-  ImGui::Begin("Sorgenti");
-
-  ImGui::Text("Aggiungi sorgente in una posizione precisa");
-  ImGui::InputFloat("x", &sorgenteNuova.x, 0, SCREEN_WIDTH, "%f");
-  ImGui::InputFloat("y", &sorgenteNuova.y, 0, SCREEN_HEIGHT, "%f");
-  ImGui::InputFloat("caricaSorgenteNuova", &caricaSorgenteNuova, -1e-20f, +1e-20f, "%e");
-  if (ImGui::Button("Aggiungi")) {
-    addSorgenteFunc(sorgenti, sorgenteNuova.x, sorgenteNuova.y);
-  }
-  ImGui::Separator();
-  ImGui::BeginTable("sorgenti", 4, ImGuiTableFlags_Borders);
-  ImGui::TableSetupColumn("N");
-  ImGui::TableSetupColumn("Coloumb");
-  ImGui::TableSetupColumn("X");
-  ImGui::TableSetupColumn("Y");
-  ImGui::TableHeadersRow();
-  for (unsigned int i = 0; i < sorgenti.size(); i++) {
-
-    std::ostringstream streamObj;
-    streamObj << sorgenti[i].getCharge();
-    // ImGui::Text("Sorgente %d: %s C", i, streamObj.str().c_str());
-
-    ImGui::TableNextRow();
-    ImGui::TableSetColumnIndex(0);
-    ImGui::Text("%d", i);
-    ImGui::TableSetColumnIndex(1);
-    ImGui::Text("%s", streamObj.str().c_str());
-    ImGui::TableSetColumnIndex(2);
-    ImGui::Text("%f", sorgenti[i].getPosition().x);
-    ImGui::TableSetColumnIndex(3);
-    ImGui::Text("%f", sorgenti[i].getPosition().y);
-  }
-  ImGui::EndTable();
-  ImGui::Separator();
-  if(ImGui::Button("Elimina sorgenti")) {
-	clearSorgenti(sorgenti);
-  }
-
   ImGui::End();
 
-  if (cariche.size() > 0) {
-    ImGui::Begin("Cariche di prova");
-    ImGui::BeginTable("cariche", 5, ImGuiTableFlags_Borders);
-    ImGui::TableSetupColumn("Carica");
+  ImGui::SetNextWindowDockID(sidebarBottom, ImGuiCond_FirstUseEver);
+  if (ImGui::Begin("Cariche di prova")) {
+    ImGui::Text("Aggiungi carica in una posizione precisa");
+    ImGui::InputFloat("x", &caricaNuova.x, 0, SCREEN_WIDTH, "%f");
+    ImGui::InputFloat("y", &caricaNuova.y, 0, SCREEN_HEIGHT, "%f");
+    if (ImGui::Button("Aggiungi")) {
+      addCaricaFunc(cariche, caricaNuova.x, caricaNuova.y);
+    }
+    ImGui::TextWrapped("Per creare una carica, puoi anche puntare con il mouse dove vuoi aggiungerla e premere il tasto 'spazio'.");
+    ImGui::Separator();
+    ImGui::BeginTable("cariche", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp);
+    ImGui::TableSetupColumn("N");
     ImGui::TableSetupColumn("Accelerazione x");
     ImGui::TableSetupColumn("Accelerazione y");
     ImGui::TableSetupColumn("Posizione x");
@@ -161,18 +154,57 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
       // cariche[i].getPosition().x, cariche[i].getPosition().y);
     }
     ImGui::EndTable();
-	ImGui::Separator();
-	if(ImGui::Button("Elimina cariche")) {
-		clearCariche(cariche);
-	}
-
-    ImGui::End();
+    ImGui::Separator();
+    if (ImGui::Button("Elimina cariche")) {
+      clearCariche(cariche);
+    }
   }
+  ImGui::End();
 
-    // Rendering ImGUI
-    ImGui::ShowDemoWindow();
+  ImGui::SetNextWindowDockID(sidebarBottom, ImGuiCond_FirstUseEver);
+  if (ImGui::Begin("Sorgenti")) {
+    ImGui::Text("Aggiungi sorgente in una posizione precisa");
+    ImGui::InputFloat("x", &sorgenteNuova.x, 0, SCREEN_WIDTH, "%f");
+    ImGui::InputFloat("y", &sorgenteNuova.y, 0, SCREEN_HEIGHT, "%f");
+    ImGui::InputFloat("caricaSorgenteNuova", &caricaSorgenteNuova, -1e-20f, +1e-20f, "%e");
+    if (ImGui::Button("Aggiungi")) {
+      addSorgenteFunc(sorgenti, sorgenteNuova.x, sorgenteNuova.y);
+    }
+    ImGui::Separator();
+    ImGui::BeginTable("sorgenti", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp);
+    ImGui::TableSetupColumn("N");
+    ImGui::TableSetupColumn("Intensità (C)");
+    ImGui::TableSetupColumn("X");
+    ImGui::TableSetupColumn("Y");
+    ImGui::TableHeadersRow();
+    for (unsigned int i = 0; i < sorgenti.size(); i++) {
 
-    ImGui::Render();
+      std::ostringstream streamObj;
+      streamObj << sorgenti[i].getCharge();
+      // ImGui::Text("Sorgente %d: %s C", i, streamObj.str().c_str());
 
-    ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+      ImGui::TableNextRow();
+      ImGui::TableSetColumnIndex(0);
+      ImGui::Text("%d", i);
+      ImGui::TableSetColumnIndex(1);
+      ImGui::Text("%s", streamObj.str().c_str());
+      ImGui::TableSetColumnIndex(2);
+      ImGui::Text("%f", sorgenti[i].getPosition().x);
+      ImGui::TableSetColumnIndex(3);
+      ImGui::Text("%f", sorgenti[i].getPosition().y);
+    }
+    ImGui::EndTable();
+    ImGui::Separator();
+    if (ImGui::Button("Elimina sorgenti")) {
+      clearSorgenti(sorgenti);
+    }
+  }
+  ImGui::End();
+
+  // Rendering ImGUI
+  //ImGui::ShowDemoWindow();
+
+  ImGui::Render();
+
+  ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
 }

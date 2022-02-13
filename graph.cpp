@@ -15,3 +15,8 @@ void Graph::render(SDL_Renderer *renderer) {
   };
 };
 
+void Graph::renderByPoints(SDL_Renderer *renderer) {
+  for(Point &point : puntiDelGrafico) {
+    SDL_RenderDrawPoint(renderer, static_cast<int>(point.x), static_cast<int>(point.y));
+  }
+}

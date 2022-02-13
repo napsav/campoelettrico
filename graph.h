@@ -7,17 +7,17 @@
 #include <vector>
 
 struct Point {
-	Point(float xpos, float ypos) {
-		x = xpos;
-		y = ypos;
-	}
-	float x;
-	float y;
+  Point(float xpos, float ypos) {
+    x = xpos;
+    y = ypos;
+  }
+  float x;
+  float y;
 };
 
-
 class Graph {
-	public:
-		void render(SDL_Renderer *renderer);
-		std::vector<Point> puntiDelGrafico;
+public:
+  void render(SDL_Renderer *renderer);
+  void renderByPoints(SDL_Renderer *renderer);
+  std::vector<Point> puntiDelGrafico;
 };
