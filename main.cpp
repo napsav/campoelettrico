@@ -105,6 +105,7 @@ int main(int argc, char **argv) {
   io.WantCaptureKeyboard = true;
   io.Fonts->AddFontFromMemoryCompressedTTF(robotoFont_compressed_data, robotoFont_compressed_size, 16);
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  io.IniFilename = NULL;
 
   /** NOT YET SUPPORTED TODO: update when available
    * io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
@@ -190,10 +191,8 @@ int main(int argc, char **argv) {
 
     // Punti del campo vettoriale, ogni vettore rappresenta la forza
     // totale del/dei campi elettrico/i
-    unsigned int index;
     for (itSorgenti = sorgenti.begin(); itSorgenti != sorgenti.end();
          itSorgenti++) {
-      index = itSorgenti - sorgenti.begin();
       if (itSorgenti->selected) {
         itSorgenti->setPosition(
             vector2{static_cast<float>(x), static_cast<float>(y)});

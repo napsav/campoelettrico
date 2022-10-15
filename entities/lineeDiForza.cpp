@@ -1,4 +1,3 @@
-
 #include "lineeDiForza.h"
 #include "../settings.h"
 #define PI 3.141592
@@ -6,8 +5,6 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
-
-
 
 float salto = 2;
 int maxStep = 1000;
@@ -31,44 +28,44 @@ void CaricaLineaDiForza::addForce(vector2 vettore) {
 
 void CaricaLineaDiForza::computeVectors(std::vector<Sorgente> &Sorgenti) {
   for (currentStep = 0; currentStep < maxStep; currentStep++) {
+    if ((position.x < SCREEN_WIDTH && position.x > 0) && (position.y > 0 && position.y < SCREEN_HEIGHT)) {
 
-    // Più lo step è alto, più la curva sarà precisa
+      // Più lo step è alto, più la curva sarà precisa
 
-    // Per ogni sorgente, viene calcolata l'intensità in un punto discreto dell'approssimazione della curva
+      // Per ogni sorgente, viene calcolata l'intensità in un punto discreto dell'approssimazione della curva
+      for (auto sorgente : Sorgenti) {
+        vector2 intensita;
+        float valoreForzaCampo;
+        vector2 distanzaVettore = distanza(sorgente.getPosition(), position);
+        if (distanzaVettore.modulo != 0) {
+          valoreForzaCampo =
+              costanteColoumb * (sorgente.getCharge() /
+                                 ((distanzaVettore.modulo * distanzaVettore.modulo) *
+                                  (1.0f / (scala * scala))));
+        } else {
+          valoreForzaCampo = 0;
+        }
 
-    for (auto sorgente : Sorgenti) {
-      vector2 intensita;
-      float valoreForzaCampo;
-      vector2 distanzaVettore = distanza(sorgente.getPosition(), position);
-      if (distanzaVettore.modulo != 0) {
-        valoreForzaCampo =
-            costanteColoumb * (sorgente.getCharge() /
-                               ((distanzaVettore.modulo * distanzaVettore.modulo) *
-                                (1.0f / (scala * scala))));
-      } else {
-        valoreForzaCampo = 0;
+        intensita.x = valoreForzaCampo * distanzaVettore.xNormalized;
+        intensita.y = valoreForzaCampo * distanzaVettore.yNormalized;
+        intensita.modulo = valoreForzaCampo;
+        this->addForce(intensita);
       }
 
-      intensita.x = valoreForzaCampo * distanzaVettore.xNormalized;
-      intensita.y = valoreForzaCampo * distanzaVettore.yNormalized;
-      intensita.modulo = valoreForzaCampo;
-      this->addForce(intensita);
-    }
+      // Per il principio di sovrapposizione, tutti i vettori campo elettrico si sommano, quindi qui calcolo la risultante di tutte le sorgenti
 
-    // Per il principio di sovrapposizione, tutti i vettori campo elettrico si sommano, quindi qui calcolo la risultante di tutte le sorgenti
-
-    for (it = vettori.begin(); it != vettori.end(); it++) {
-      campoelettrico.x += it->x;
-      campoelettrico.y += it->y;
+      for (it = vettori.begin(); it != vettori.end(); it++) {
+        campoelettrico.x += it->x;
+        campoelettrico.y += it->y;
+      }
+      campoelettrico.modulo = sqrt((campoelettrico.x * campoelettrico.x) + (campoelettrico.y * campoelettrico.y));
+      position.x += salto * ((campoelettrico.x) / (campoelettrico.modulo));
+      position.y += salto * ((campoelettrico.y) / (campoelettrico.modulo));
+      ramo.puntiDelGrafico.push_back(Point(position.x, position.y));
+      this->emptyVectors();
     }
-    campoelettrico.modulo = sqrt((campoelettrico.x * campoelettrico.x) + (campoelettrico.y * campoelettrico.y));
-    position.x += salto * ((campoelettrico.x) / (campoelettrico.modulo));
-    position.y += salto * ((campoelettrico.y) / (campoelettrico.modulo));
 
     // Rendering linee di campo
-
-    ramo.puntiDelGrafico.push_back(Point(position.x, position.y));
-    this->emptyVectors();
   }
   position.x = posizioneIniziale.x;
   position.y = posizioneIniziale.y;
@@ -99,3 +96,4 @@ void spawnLinee(std::vector<CaricaLineaDiForza> &linee, std::vector<Sorgente>::i
     }
   }
 }
+
