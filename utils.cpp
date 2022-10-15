@@ -5,7 +5,7 @@ void setDensity(std::vector<PuntoDelCampo> &punti, float densita) {
   for (unsigned int i = 0; i < SCREEN_WIDTH; i = i + densita) {
     for (unsigned int j = 0; j < SCREEN_HEIGHT; j = j + densita) {
       punti.push_back(
-          *new PuntoDelCampo(static_cast<float>(i), static_cast<float>(j)));
+          PuntoDelCampo(static_cast<float>(i), static_cast<float>(j)));
     }
   }
 }
