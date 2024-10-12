@@ -28,8 +28,8 @@ void CaricaLineaDiForza::addForce(vector2 vettore) {
 
 void CaricaLineaDiForza::computeVectors(std::vector<Sorgente> &Sorgenti) {
   for (currentStep = 0; currentStep < maxStep; currentStep++) {
-    if ((position.x < SCREEN_WIDTH && position.x > 0) && (position.y > 0 && position.y < SCREEN_HEIGHT)) {
-
+    //if ((position.x < SCREEN_WIDTH && position.x > 0) && (position.y > 0 && position.y < SCREEN_HEIGHT)) {
+    // +Settings::canvas.getOrigin().x)*Settings::canvas.scale
       // Più lo step è alto, più la curva sarà precisa
 
       // Per ogni sorgente, viene calcolata l'intensità in un punto discreto dell'approssimazione della curva
@@ -63,7 +63,7 @@ void CaricaLineaDiForza::computeVectors(std::vector<Sorgente> &Sorgenti) {
       position.y += salto * ((campoelettrico.y) / (campoelettrico.modulo));
       ramo.puntiDelGrafico.push_back(Point(position.x, position.y));
       this->emptyVectors();
-    }
+    //}
 
     // Rendering linee di campo
   }

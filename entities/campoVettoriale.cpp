@@ -52,9 +52,13 @@ void PuntoDelCampo::render(SDL_Renderer *renderer) {
                              0x00, 0xFF);
     }
   }
-  SDL_RenderDrawLine(renderer, posizione.x, posizione.y,
-                     posizione.x + (sommaFinale.xNormalized * lunghezza),
-                     posizione.y + (sommaFinale.yNormalized * lunghezza));
+  Settings::canvas.drawLine( posizione,
+                            {
+                               posizione.x + (sommaFinale.xNormalized * lunghezza),
+                               posizione.y + (sommaFinale.yNormalized * lunghezza)
+
+                            }
+                            );
 }
 
 void PuntoDelCampo::setCarica(float charge) { carica = charge; }

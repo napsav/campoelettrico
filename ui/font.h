@@ -1,5 +1,8 @@
 // Roboto-Regular.ttf' (305668 bytes)
+// Licensed under: https://www.apache.org/licenses/LICENSE-2.0.txt
 // Exported using binary_to_compressed_c.cpp
+#pragma once
+
 static const unsigned int robotoFont_compressed_size = 238428;
 static const unsigned int robotoFont_compressed_data[238428/4] =
 {

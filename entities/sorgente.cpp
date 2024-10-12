@@ -45,7 +45,7 @@ void Sorgente::render(SDL_Renderer *renderer) {
   } else {
     SDL_SetRenderDrawColor(renderer, COLORE(coloreSorgente));
   }
-  DrawCircle(renderer, posizione.x, posizione.y, raggio);
+  Settings::canvas.drawCircle(posizione, raggio);
 }
 
 void Sorgente::handleEnvent(SDL_Event &e, int x, int y) {

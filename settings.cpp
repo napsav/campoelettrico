@@ -45,3 +45,12 @@ bool darkMode = true;
 bool abilitaLog = false;
 float caricaDiProva = 1.602176634e-19;
 float caricaSorgenteNuova = 1.5e-9;
+
+unsigned int Settings::gridSize = 10;
+bool Settings::drawGrid = true;
+
+int Settings::SCREEN_HEIGHT = 720;
+int Settings::SCREEN_WIDTH = 1280;
+float Settings::backgroundColor[4] = {0, 0, 0, 1};
+float Settings::gridColor[4] = {0.2, 0.2, 0.2, 1};
+float Settings::SCALE_STEP = 0.20;

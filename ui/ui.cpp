@@ -1,4 +1,6 @@
 #include "ui.h"
+#include "IconsMaterialDesign.h"
+#include "material_icons.h"
 
 bool initial_layout_done;
 ImGuiID main_dock;
@@ -44,8 +46,26 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
     }
   }
 
+  ImGui::SetNextWindowDockID ( sidebar_dock, ImGuiCond_FirstUseEver );
+  ImGui::Begin ( ICON_MD_LAYERS " Canvas" );
+  ImGui::Checkbox("snap to grid", &Settings::canvas.snap);
+  ImGui::DragInt ( "grid size", ( int * ) &Settings::gridSize,1, 10, 1000 );
+  ImGui::Checkbox ( "draw grid", &Settings::drawGrid );
+  ImGui::Text ( "origin - x:%f\ty:%f", Settings::canvas.getOrigin().x, Settings::canvas.getOrigin().y );
+  if ( ImGui::Button ( "Reset viewport" ) )
+  {
+      Settings::canvas.setOrigin ( {200,200} );
+  }
+  ImGui::Separator();
+  //ImGui::Text ( "mouse - x:%d\ty:%d", x, y );
+  ImGui::Checkbox ( "unscaled axes", &Settings::canvas.unscaledAxes );
+  ImGui::DragFloat ( "scale",&Settings::canvas.scale, 0.01, 1.0f, 10.0f );
+  ImGui::DragFloat ( "scale_step", &Settings::SCALE_STEP, 0.001, 0.01, 0.5, "%f" );
+
+  ImGui::End();
+
   ImGui::SetNextWindowDockID(sidebar_dock, ImGuiCond_FirstUseEver);
-  ImGui::Begin("Impostazioni");
+  ImGui::Begin(ICON_MD_SETTINGS " Impostazioni");
   if (pause) {
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Stato della simulazione: IN PAUSA");
     if (ImGui::Button("Avvia"))
@@ -200,6 +220,8 @@ void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensi
     }
   }
   ImGui::End();
+
+
 
   // Rendering ImGUI
   //ImGui::ShowDemoWindow();

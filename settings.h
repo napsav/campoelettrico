@@ -1,5 +1,7 @@
 #pragma once
 #include "entities/vector.h"
+#include "ui/components/canvas.h"
+
 extern int lunghezza;
 extern int raggio;
 extern float maxCarica;
@@ -34,3 +36,25 @@ extern float caricaDiProva;
 extern vector2 caricaNuova;
 extern vector2 sorgenteNuova;
 extern float caricaSorgenteNuova;
+
+const float red[4] = {1.0,0,0,1};
+const float green[4] = {0,1.0,0,1};
+const float blue[4] = {0,0,1,1};
+const float yellow[4] = {1,1,0,1};
+const float cyan[4] = {0,1,1,1};
+
+class Settings
+{
+public:
+    static unsigned int gridSize;
+    static bool drawGrid;
+    static int SCREEN_HEIGHT;
+    static int SCREEN_WIDTH;
+    static float backgroundColor[4];
+    static float gridColor[4];
+    static float SCALE_STEP;
+    static Canvas canvas;
+
+private:
+    Settings();
+};

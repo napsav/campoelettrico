@@ -14,6 +14,7 @@ entities/campoVettoriale.cpp
 entities/vector.cpp
 entities/charge.cpp
 entities/lineeDiForza.cpp
+entities/polygon.cpp
 ui/ui.cpp
 ui/imgui.cpp
 ui/imgui_demo.cpp
@@ -22,6 +23,7 @@ ui/imgui_tables.cpp
 ui/imgui_widgets.cpp
 ui/imgui_impl_sdlrenderer.cpp
 ui/imgui_impl_sdl.cpp
+ui/components/canvas.cpp
 graph.cpp
 fisica.cpp
 utils.cpp

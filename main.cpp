@@ -18,6 +18,8 @@
 #include "graph.h"
 #include "macros.h"
 #include "settings.h"
+#include "ui/IconsMaterialDesign.h"
+#include "ui/material_icons.h"
 #include "ui/ui.h"
 #include "utils.h"
 #if !SDL_VERSION_ATLEAST(2, 0, 17)
@@ -65,6 +67,8 @@ bool init() {
   return success;
 }
 
+Canvas Settings::canvas = Canvas(NULL, {200, 200});
+
 int main(int argc, char **argv) {
   if (!init()) {
     std::cout << "Init di SDL fallito" << std::endl;
@@ -85,25 +89,36 @@ int main(int argc, char **argv) {
   std::vector<Carica> cariche;
   std::vector<CaricaLineaDiForza> lineeDiForza;
   std::vector<vector2> mouseVector;
-  Sorgente sorgentePrima = Sorgente({300, 500}, 2.5e-9);
-  Sorgente sorgenteSeconda = Sorgente({600, 500}, 5.2e-8);
+  Sorgente sorgentePrima = Sorgente({100, 300}, 2.5e-9);
+  Sorgente sorgenteSeconda = Sorgente({400, 300}, 5.2e-8);
   sorgenti.push_back(sorgentePrima);
   sorgenti.push_back(sorgenteSeconda);
 
+  Settings::canvas = Canvas(gRenderer, {200, 200});
+
+  setDensity(punti, densita);
+
+  // IMGUI
+
   ImGui::CreateContext();
 
-  /**
-   * imgui_sdl (vecchio)
-   * ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
-   */
-
-  // carica caricaDiProva = {{600, 300}, {}};
-  setDensity(punti, densita);
   ImGuiIO &io = ImGui::GetIO();
   (void)io;
-  // vecchio sdl: ImGui_ImplSDL2_InitTest(gWindow);
+
   io.WantCaptureKeyboard = true;
   io.Fonts->AddFontFromMemoryCompressedTTF(robotoFont_compressed_data, robotoFont_compressed_size, 16);
+
+  // MATERIAL DESIGN ICONS
+
+  static const ImWchar icons_ranges[] = {ICON_MIN_MD, ICON_MAX_16_MD, 0};
+  ImFontConfig icons_config;
+  icons_config.MergeMode = true;
+  icons_config.PixelSnapH = true;
+
+  icons_config.GlyphOffset.y += 3.0f;
+  io.Fonts->AddFontFromMemoryCompressedTTF(material_icons_compressed_data,
+                                           material_icons_compressed_size,
+                                           16.0f, &icons_config, icons_ranges);
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   io.IniFilename = NULL;
 
@@ -118,34 +133,7 @@ int main(int argc, char **argv) {
     int wheel = 0;
     SDL_GetMouseState(&x, &y);
     while (SDL_PollEvent(&e) != 0) {
-      ImGui_ImplSDL2_ProcessEvent(&e);
-      if (e.type == SDL_QUIT) {
-        quit = true;
-      } else if (e.type == SDL_KEYDOWN) {
-        switch (e.key.keysym.sym) {
-        case SDLK_n:
-          addSorgenteFunc(sorgenti, -1, -1);
-          break;
-        case SDLK_UP:
-          lunghezza += 10;
-          break;
-        case SDLK_DOWN:
-          lunghezza -= 10;
-          break;
-        case SDLK_r:
-          sorgenti.clear();
-          break;
-        case SDLK_k:
-          grafico.puntiDelGrafico.clear();
-          break;
-        case SDLK_SPACE:
-          addCaricaFunc(cariche, x, y);
-          break;
-        case SDLK_p:
-          pause = !pause;
-          break;
-        }
-      } else if (e.type == SDL_WINDOWEVENT) {
+      if (e.type == SDL_WINDOWEVENT) {
         if (e.window.event == SDL_WINDOWEVENT_CLOSE && e.window.windowID == SDL_GetWindowID(gWindow))
           quit = true;
         if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
@@ -158,13 +146,45 @@ int main(int argc, char **argv) {
           // ImGuiSDL::Deinitialize();
           // ImGuiSDL::Initialize(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT);
         }
-      } else if (e.type == SDL_MOUSEBUTTONDOWN) {
-      } else if (e.type == SDL_MOUSEWHEEL) {
-        wheel = e.wheel.y;
+      } else if (e.type == SDL_QUIT) {
+        quit = true;
       }
-      for (itSorgenti = sorgenti.begin(); itSorgenti != sorgenti.end();
-           itSorgenti++) {
-        itSorgenti->handleEnvent(e, x, y);
+      if (io.WantCaptureMouse || io.WantCaptureKeyboard) {
+        ImGui_ImplSDL2_ProcessEvent(&e);
+      } else {
+        Settings::canvas.handleEvents(e, x, y);
+        if (e.type == SDL_KEYDOWN) {
+          switch (e.key.keysym.sym) {
+          case SDLK_n:
+            addSorgenteFunc(sorgenti, -1, -1);
+            break;
+          case SDLK_UP:
+            lunghezza += 10;
+            break;
+          case SDLK_DOWN:
+            lunghezza -= 10;
+            break;
+          case SDLK_r:
+            sorgenti.clear();
+            break;
+          case SDLK_k:
+            grafico.puntiDelGrafico.clear();
+            break;
+          case SDLK_SPACE:
+            addCaricaFunc(cariche, x, y);
+            break;
+          case SDLK_p:
+            pause = !pause;
+            break;
+          }
+        } else if (e.type == SDL_MOUSEBUTTONDOWN) {
+        } else if (e.type == SDL_MOUSEWHEEL) {
+          wheel = e.wheel.y;
+        }
+        for (itSorgenti = sorgenti.begin(); itSorgenti != sorgenti.end();
+             itSorgenti++) {
+          itSorgenti->handleEnvent(e, x, y);
+        }
       }
     }
 
@@ -186,6 +206,8 @@ int main(int argc, char **argv) {
     SDL_SetRenderDrawColor(gRenderer, COLORE(coloreSfondo));
     SDL_RenderClear(gRenderer);
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+    Settings::canvas.renderCanvas(x, y);
 
     unsigned int sizeCariche = cariche.size();
 
@@ -237,9 +259,9 @@ int main(int argc, char **argv) {
     stepTimer.start();
 
     // RENDERING GRIGLIA
-    if (drawGrid) {
-      RenderGriglia(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT, scala);
-    }
+    // if (drawGrid) {
+    //  RenderGriglia(gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT, scala);
+    //}
 
     // Rendering cariche di prova
     SDL_SetRenderDrawColor(gRenderer, COLORE(coloreCarica));
@@ -287,7 +309,6 @@ int main(int argc, char **argv) {
       lineeDiForza.clear();
     }
 
-    // Rendering IMGUI
     renderUi(pause, gWindow, darkMode, intensitaMouse, punti, cariche, sorgenti, grafico);
 
     /* NOT YET SUPPORTED TODO: update when available

@@ -10,5 +10,9 @@
 #include "imgui_internal.h"
 #include "../graph.h"
 
+extern ImGuiID main_dock;
+extern ImGuiID sidebar_dock;
+extern ImGuiID sidebarBottom;
+
 
 void renderUi(bool &pause, SDL_Window *gWindow, bool &darkMode, vector2 &intensitaMouse, std::vector<PuntoDelCampo> &punti, std::vector<Carica> &cariche, std::vector<Sorgente> &sorgenti, Graph &graficoCariche);
